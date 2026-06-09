@@ -2,7 +2,8 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Viewport optimized for mobile with notch safe-area support and prevents accidental double-tap zoom -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Tâm Thức Thịnh Vượng - SOGR Visualizer</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,6 +46,8 @@
         body {
             background: radial-gradient(circle at 50% 50%, #161725 0%, #08080C 100%);
             background-attachment: fixed;
+            /* Prevent bouncing on mobile pull-to-refresh */
+            overscroll-behavior-y: contain;
         }
 
         /* Ambient Glow effect */
@@ -72,17 +75,17 @@
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 4px;
         }
         ::-webkit-scrollbar-track {
             background: rgba(10, 10, 12, 0.5);
         }
         ::-webkit-scrollbar-thumb {
             background: #D4AF37;
-            border-radius: 3px;
+            border-radius: 2px;
         }
 
-        /* Cinema Autoscroll Styles */
+        /* Cinema Autoscroll Styles - GPU Accelerated */
         #cinema-container:fullscreen {
             background: #000000 !important;
             width: 100vw;
@@ -91,6 +94,21 @@
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        /* GPU Acceleration Enforcer for Mobile buttery-smoothness */
+        #cinema-text-wrapper {
+            will-change: transform;
+            backface-visibility: hidden;
+            transform-style: preserve-3d;
+        }
+
+        /* Mobile specific notch safe spaces */
+        .safe-pb {
+            padding-bottom: env(safe-area-inset-bottom, 16px);
+        }
+        .safe-pt {
+            padding-top: env(safe-area-inset-top, 16px);
         }
 
         /* Print Media Setup */
@@ -140,133 +158,133 @@
         }
     </style>
 </head>
-<body class="text-slate-100 font-sans min-h-screen pb-12 overflow-x-hidden">
+<body class="text-slate-100 font-sans min-h-screen pb-12 overflow-x-hidden safe-pb">
 
     <!-- Header Section -->
-    <header class="border-b border-slate-800/60 bg-luxury-black/60 backdrop-blur-md sticky top-0 z-30 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="text-center sm:text-left flex flex-col sm:flex-row items-center gap-4">
+    <header class="border-b border-slate-800/60 bg-luxury-black/60 backdrop-blur-md sticky top-0 z-30 transition-all duration-300 safe-pt">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
+            <div class="text-center md:text-left flex flex-col sm:flex-row items-center gap-3">
                 <div>
-                    <h1 class="text-2xl sm:text-3xl font-serif font-bold bg-gradient-to-r from-amber-200 via-gold to-gold-dark bg-clip-text text-transparent tracking-wide">
+                    <h1 class="text-xl sm:text-2xl font-serif font-bold bg-gradient-to-r from-amber-200 via-gold to-gold-dark bg-clip-text text-transparent tracking-wide">
                         Tâm Thức Thịnh Vượng
                     </h1>
-                    <p class="text-xs text-slate-400 tracking-widest uppercase mt-1">SOGR Visualizer • Science of Getting Rich</p>
+                    <p class="text-[10px] text-slate-400 tracking-widest uppercase mt-0.5">SOGR Visualizer • Science of Getting Rich</p>
                 </div>
                 <!-- Dynamic Cloud Sync Status Badge -->
-                <button onclick="openCloudModal()" id="sync-status-badge" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-800 text-xs text-slate-400 bg-luxury-card/50 transition-all hover:border-gold/40">
+                <button onclick="openCloudModal()" id="sync-status-badge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-800 text-[10px] text-slate-400 bg-luxury-card/50 transition-all hover:border-gold/40">
                     <i class="fa-solid fa-cloud"></i>
                     <span id="sync-status-text">Thiết lập đám mây</span>
                 </button>
             </div>
             
             <!-- Quick Actions Header -->
-            <div class="flex items-center gap-3">
-                <button onclick="triggerPrint()" class="px-3 py-1.5 rounded-lg border border-slate-700 hover:border-gold text-slate-300 hover:text-gold text-sm transition-all flex items-center gap-2 bg-luxury-card/50">
-                    <i class="fa-solid fa-print"></i> In Thẻ Mục Tiêu
+            <div class="flex items-center gap-2.5 w-full sm:w-auto justify-center sm:justify-end">
+                <button onclick="triggerPrint()" class="px-2.5 py-1.5 rounded-lg border border-slate-700 hover:border-gold text-slate-300 hover:text-gold text-xs transition-all flex items-center gap-1.5 bg-luxury-card/50">
+                    <i class="fa-solid fa-print"></i> In Thẻ
                 </button>
-                <div class="h-6 w-[1px] bg-slate-800"></div>
-                <div id="streak-badge" class="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-gold-dark/20 to-gold/20 border border-gold/40 rounded-full">
-                    <i class="fa-solid fa-fire text-gold animate-pulse"></i>
-                    <span class="text-sm font-medium text-gold-light"><span id="streak-count-badge">0</span> Ngày liên tiếp</span>
+                <div class="h-5 w-[1px] bg-slate-800"></div>
+                <div id="streak-badge" class="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-gold-dark/20 to-gold/20 border border-gold/40 rounded-full">
+                    <i class="fa-solid fa-fire text-gold animate-pulse text-xs"></i>
+                    <span class="text-xs font-medium text-gold-light"><span id="streak-count-badge">0</span> Ngày liên tiếp</span>
                 </div>
             </div>
         </div>
     </header>
 
     <!-- Main Content Grid -->
-    <main class="max-w-7xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <main class="max-w-7xl mx-auto px-4 mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         <!-- LEFT COLUMN: 3D Card / Sound Synth -->
-        <section class="lg:col-span-7 flex flex-col gap-8">
+        <section class="lg:col-span-7 flex flex-col gap-6">
             
             <!-- SECTION 1: Interactive 3D Goal Card -->
-            <div class="bg-luxury-card/30 backdrop-blur-md rounded-2xl p-6 border border-slate-800/80 gold-glow relative overflow-hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-serif text-gold-light font-medium flex items-center gap-2">
-                        <i class="fa-solid fa-credit-card"></i> Thẻ Mục Tiêu 3D (SOGR Goal Card)
+            <div class="bg-luxury-card/30 backdrop-blur-md rounded-2xl p-4 sm:p-6 border border-slate-800/80 gold-glow relative overflow-hidden">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-sm sm:text-base font-serif text-gold-light font-medium flex items-center gap-2">
+                        <i class="fa-solid fa-credit-card"></i> Thẻ Mục Tiêu 3D (Goal Card)
                     </h2>
-                    <div class="flex gap-2">
-                        <button onclick="flipCard()" class="px-3 py-1 text-xs bg-gold/10 hover:bg-gold/20 text-gold border border-gold/30 rounded-md transition-all">
+                    <div class="flex gap-1.5">
+                        <button onclick="flipCard()" class="px-2.5 py-1 text-[11px] bg-gold/10 hover:bg-gold/20 text-gold border border-gold/30 rounded-md transition-all">
                             <i class="fa-solid fa-rotate"></i> Lật Thẻ
                         </button>
                     </div>
                 </div>
 
                 <!-- 3D Container -->
-                <div class="perspective-1000 w-full h-80 sm:h-72">
+                <div class="perspective-1000 w-full h-[340px] sm:h-72">
                     <div id="goal-card-inner" class="preserve-3d w-full h-full relative cursor-pointer">
                         
                         <!-- CARD FRONT -->
-                        <div class="backface-hidden absolute inset-0 w-full h-full bg-gradient-to-br from-luxury-navy to-luxury-black border-2 border-dashed border-gold/40 rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl">
+                        <div class="backface-hidden absolute inset-0 w-full h-full bg-gradient-to-br from-luxury-navy to-luxury-black border-2 border-dashed border-gold/40 rounded-xl p-4 sm:p-6 flex flex-col justify-between shadow-2xl">
                             <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,0.06),transparent)] rounded-xl pointer-events-none"></div>
                             <div class="flex justify-between items-start">
-                                <span class="text-[10px] uppercase tracking-widest text-gold/60 font-mono">Bản thiết kế tài chính</span>
-                                <i class="fa-solid fa-crown text-gold/40"></i>
+                                <span class="text-[9px] uppercase tracking-widest text-gold/60 font-mono">Bản thiết kế tài chính</span>
+                                <i class="fa-solid fa-crown text-gold/40 text-xs"></i>
                             </div>
                             
                             <!-- Editable Goal Area -->
                             <div class="my-auto">
                                 <textarea id="goal-text-input" 
-                                    class="w-full bg-transparent text-center text-slate-200 font-serif text-sm sm:text-base leading-relaxed focus:outline-none resize-none h-40"
+                                    class="w-full bg-transparent text-center text-slate-200 font-serif text-sm sm:text-base leading-relaxed focus:outline-none resize-none h-48 sm:h-36"
                                     placeholder="Nhập mục tiêu tài chính của bạn tại đây..."></textarea>
                             </div>
 
-                            <div class="flex justify-between items-end border-t border-slate-800/80 pt-3">
-                                <span class="text-[10px] text-slate-500 font-serif italic">"Quyền được giàu có..."</span>
-                                <span class="text-[9px] text-gold/80 font-mono tracking-widest">SOGR VISUALIZER</span>
+                            <div class="flex justify-between items-end border-t border-slate-800/80 pt-2.5">
+                                <span class="text-[9px] text-slate-500 font-serif italic">"Quyền được giàu có..."</span>
+                                <span class="text-[8px] text-gold/80 font-mono tracking-widest">SOGR VISUALIZER</span>
                             </div>
                         </div>
 
                         <!-- CARD BACK -->
-                        <div class="backface-hidden rotate-y-180 absolute inset-0 w-full h-full bg-gradient-to-br from-luxury-black to-slate-950 border-2 border-double border-gold/60 rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl">
+                        <div class="backface-hidden rotate-y-180 absolute inset-0 w-full h-full bg-gradient-to-br from-luxury-black to-slate-950 border-2 border-double border-gold/60 rounded-xl p-4 sm:p-6 flex flex-col justify-between shadow-2xl">
                             <div class="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(212,175,55,0.06),transparent)] rounded-xl pointer-events-none"></div>
                             <div class="flex justify-between items-start border-b border-slate-900 pb-2">
-                                <span class="text-[10px] uppercase tracking-widest text-gold font-mono">3 Nguyên lý Đức tin</span>
-                                <i class="fa-solid fa-circle-nodes text-gold/50"></i>
+                                <span class="text-[9px] uppercase tracking-widest text-gold font-mono">3 Nguyên lý Đức tin</span>
+                                <i class="fa-solid fa-circle-nodes text-gold/50 text-xs"></i>
                             </div>
 
                             <!-- Non-editable / Read-only Principles text but elegantly presented -->
-                            <div class="text-[11px] sm:text-xs text-slate-300 leading-relaxed font-serif text-justify my-auto space-y-2 py-2 overflow-y-auto max-h-44">
+                            <div class="text-[11px] sm:text-xs text-slate-300 leading-relaxed font-serif text-justify my-auto space-y-2 py-2 overflow-y-auto max-h-56">
                                 <p><strong class="text-gold">1.</strong> Có một chất liệu tư duy tạo nên vạn vật, lấp đầy mọi khoảng không gian của vũ trụ.</p>
                                 <p><strong class="text-gold">2.</strong> Một suy nghĩ bên trong vật chất này sẽ tạo ra sự vật được hình dung bởi suy nghĩ đó.</p>
                                 <p><strong class="text-gold">3.</strong> Tôi có thể tạo hình các sự vật trong suy nghĩ của mình, và bằng cách khắc ghi nó lên Vật chất Vô hình, tôi khiến cho sự vật tôi nghĩ đến được tạo ra trong thực tế.</p>
                             </div>
 
-                            <div class="text-center text-[9px] text-gold/40 border-t border-slate-900 pt-2 font-mono tracking-wider">
+                            <div class="text-center text-[8px] text-gold/40 border-t border-slate-900 pt-2 font-mono tracking-wider">
                                 THE SCIENCE OF GETTING RICH
                             </div>
                         </div>
 
                     </div>
                 </div>
-                <p class="text-center text-xs text-slate-500 mt-3 italic"><i class="fa-solid fa-circle-info"></i> Nhấp trực tiếp vào thẻ hoặc nút "Lật Thẻ" để thay đổi góc nhìn.</p>
+                <p class="text-center text-[10px] text-slate-500 mt-2.5 italic"><i class="fa-solid fa-circle-info"></i> Nhấp trực tiếp vào thẻ hoặc nút "Lật Thẻ" để lật.</p>
             </div>
 
-            <!-- SECTION 2: Binaural Beats Generator (Optimized Layout) -->
-            <div class="bg-luxury-card/30 backdrop-blur-md rounded-2xl p-6 border border-slate-800/80 gold-glow">
-                <div class="flex flex-col md:flex-row gap-6 justify-between items-stretch">
+            <!-- SECTION 2: Binaural Beats Generator (Optimized Mobile Layout) -->
+            <div class="bg-luxury-card/30 backdrop-blur-md rounded-2xl p-5 sm:p-6 border border-slate-800/80 gold-glow">
+                <div class="flex flex-col md:flex-row gap-5 justify-between items-stretch">
                     <!-- Left Side: Header & Waves Trigger Buttons -->
-                    <div class="flex-1 flex flex-col justify-between gap-4">
+                    <div class="flex-1 flex flex-col justify-between gap-3">
                         <div>
-                            <h3 class="text-base font-serif text-gold-light mb-1 flex items-center gap-2">
+                            <h3 class="text-sm sm:text-base font-serif text-gold-light mb-0.5 flex items-center gap-2">
                                 <i class="fa-solid fa-wave-square"></i> Máy Phát Sóng Não Binaural
                             </h3>
-                            <p class="text-xs text-slate-400">Cộng hưởng trực tiếp tần số vào tiềm thức sâu để lập trình tư duy thịnh vượng.</p>
+                            <p class="text-[11px] text-slate-400">Cộng hưởng trực tiếp tần số vào tiềm thức sâu để lập trình tư duy thịnh vượng.</p>
                         </div>
                         
-                        <!-- Buttons -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <button id="btn-alpha" onclick="playBinaural('alpha')" class="py-3 px-4 rounded-xl border border-slate-700/60 hover:border-gold/50 bg-luxury-navy/40 hover:bg-gold/5 text-slate-300 hover:text-gold text-sm font-medium transition-all flex justify-between items-center">
+                        <!-- Buttons with large tap targets for fingers -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <button id="btn-alpha" onclick="playBinaural('alpha')" class="py-3 px-4 rounded-xl border border-slate-700/60 hover:border-gold/50 bg-luxury-navy/40 hover:bg-gold/5 text-slate-300 hover:text-gold text-xs font-medium transition-all flex justify-between items-center min-h-[44px]">
                                 <span class="flex items-center gap-2">
-                                    <i class="fa-solid fa-brain text-amber-500/80"></i> Sóng Alpha (10Hz)
+                                    <i class="fa-solid fa-brain text-amber-500/80 text-sm"></i> Sóng Alpha (10Hz)
                                 </span>
-                                <span class="text-xs text-slate-500 font-mono">Tĩnh tâm sâu</span>
+                                <span class="text-[10px] text-slate-500 font-mono">Tĩnh lặng</span>
                             </button>
-                            <button id="btn-theta" onclick="playBinaural('theta')" class="py-3 px-4 rounded-xl border border-slate-700/60 hover:border-gold/50 bg-luxury-navy/40 hover:bg-gold/5 text-slate-300 hover:text-gold text-sm font-medium transition-all flex justify-between items-center">
+                            <button id="btn-theta" onclick="playBinaural('theta')" class="py-3 px-4 rounded-xl border border-slate-700/60 hover:border-gold/50 bg-luxury-navy/40 hover:bg-gold/5 text-slate-300 hover:text-gold text-xs font-medium transition-all flex justify-between items-center min-h-[44px]">
                                 <span class="flex items-center gap-2">
-                                    <i class="fa-solid fa-bolt-lightning text-indigo-400"></i> Sóng Theta (6Hz)
+                                    <i class="fa-solid fa-bolt-lightning text-indigo-400 text-sm"></i> Sóng Theta (6Hz)
                                 </span>
-                                <span class="text-xs text-slate-500 font-mono">Cài đặt tiềm thức</span>
+                                <span class="text-[10px] text-slate-500 font-mono font-bold">Cài đặt</span>
                             </button>
                         </div>
                     </div>
@@ -275,17 +293,17 @@
                     <div class="hidden md:block w-[1px] bg-slate-800/80"></div>
 
                     <!-- Right Side: Volume & Stop controls -->
-                    <div class="w-full md:w-60 flex flex-col justify-end gap-3">
+                    <div class="w-full md:w-60 flex flex-col justify-end gap-3.5">
                         <div>
-                            <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center justify-between mb-1.5">
                                 <span class="text-xs text-slate-400">Âm lượng tai nghe</span>
                                 <span id="volume-indicator" class="text-xs text-gold font-mono font-bold">50%</span>
                             </div>
-                            <input type="range" id="sound-volume" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume(this.value)" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-gold mb-3">
+                            <input type="range" id="sound-volume" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume(this.value)" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-gold mb-2">
                         </div>
                         
-                        <button id="btn-stop-audio" onclick="stopBinaural()" class="w-full py-2.5 bg-rose-950/40 border border-rose-800/50 hover:bg-rose-900/40 text-rose-300 text-xs rounded-lg transition-all flex items-center justify-center gap-2 font-medium">
-                            <i class="fa-solid fa-stop"></i> Tắt Âm Thanh
+                        <button id="btn-stop-audio" onclick="stopBinaural()" class="w-full py-2.5 bg-rose-950/40 border border-rose-800/50 hover:bg-rose-900/40 text-rose-300 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 font-medium min-h-[40px]">
+                            <i class="fa-solid fa-stop text-xs"></i> Tắt Âm Thanh
                         </button>
                     </div>
                 </div>
@@ -294,97 +312,98 @@
         </section>
 
         <!-- RIGHT COLUMN: Mental Cinema / Ritual Tracker -->
-        <section class="lg:col-span-5 flex flex-col gap-8">
+        <section class="lg:col-span-5 flex flex-col gap-6">
             
             <!-- SECTION 3: Mental Movie Cinema Panel -->
-            <div class="bg-luxury-card/30 backdrop-blur-md rounded-2xl p-6 border border-slate-800/80 relative">
-                <div class="flex justify-between items-center mb-4">
+            <div class="bg-luxury-card/30 backdrop-blur-md rounded-2xl p-5 sm:p-6 border border-slate-800/80 relative">
+                <div class="flex justify-between items-center mb-3">
                     <div>
-                        <h2 class="text-lg font-serif text-gold-light font-medium flex items-center gap-2">
-                            <i class="fa-solid fa-film"></i> Bức Tranh Tâm Trí (Mental Movie)
+                        <h2 class="text-sm sm:text-base font-serif text-gold-light font-medium flex items-center gap-2">
+                            <i class="fa-solid fa-film text-sm"></i> Bức Tranh Tâm Trí (Mental Movie)
                         </h2>
-                        <p class="text-xs text-slate-400">Thiết lập thế giới thực tế giả lập của riêng bạn</p>
+                        <p class="text-[11px] text-slate-400">Thiết lập thế giới thực tế giả lập của riêng bạn</p>
                     </div>
                 </div>
 
                 <!-- Text Area for Mental Movie -->
                 <div class="mb-4">
                     <textarea id="mental-movie-input" 
-                        class="w-full h-64 bg-luxury-black/40 border border-slate-800/80 rounded-xl p-4 text-sm leading-relaxed text-slate-300 font-serif focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20 transition-all resize-none"
+                        class="w-full h-56 bg-luxury-black/40 border border-slate-800/80 rounded-xl p-3.5 text-xs sm:text-sm leading-relaxed text-slate-300 font-serif focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20 transition-all resize-none"
                         placeholder="Hãy viết mô tả kịch bản cuộc sống giàu có lý tưởng của bạn một cách sống động nhất..."></textarea>
                 </div>
 
                 <!-- Action button for cinema mode -->
-                <button onclick="startCinemaMode()" class="w-full py-3 bg-gradient-to-r from-gold-dark via-gold to-gold-light hover:brightness-110 text-luxury-black font-semibold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(212,175,55,0.2)]">
-                    <i class="fa-solid fa-expand"></i> Kích hoạt Rạp Chiếu Tâm Trí (Full Screen)
+                <button onclick="startCinemaMode()" class="w-full py-3 bg-gradient-to-r from-gold-dark via-gold to-gold-light hover:brightness-110 text-luxury-black font-semibold rounded-xl text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(212,175,55,0.2)] min-h-[44px]">
+                    <i class="fa-solid fa-expand text-sm"></i> Kích hoạt Rạp Chiếu Tâm Trí (Full Screen)
                 </button>
             </div>
 
             <!-- SECTION 4: In-depth Practice Tracker (Streak) -->
-            <div class="bg-luxury-card/30 backdrop-blur-md rounded-2xl p-6 border border-slate-800/80">
-                <div class="flex justify-between items-center mb-4">
+            <div class="bg-luxury-card/30 backdrop-blur-md rounded-2xl p-5 sm:p-6 border border-slate-800/80">
+                <div class="flex justify-between items-center mb-3">
                     <div>
-                        <h2 class="text-lg font-serif text-gold-light font-medium flex items-center gap-2">
-                            <i class="fa-solid fa-calendar-check"></i> Nghi Thức Thịnh Vượng Mỗi Ngày
+                        <h2 class="text-sm sm:text-base font-serif text-gold-light font-medium flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-check text-sm"></i> Nghi Thức Thịnh Vượng Mỗi Ngày
                         </h2>
-                        <p class="text-xs text-slate-400">Kiên định rèn luyện để tái lập trình tư duy tiềm thức</p>
+                        <p class="text-[11px] text-slate-400">Kiên định rèn luyện để tái lập trình tư duy tiềm thức</p>
                     </div>
                 </div>
 
                 <!-- Morning Rituals -->
-                <div class="mb-5 bg-luxury-navy/40 rounded-xl p-4 border border-slate-800">
-                    <h3 class="text-xs uppercase tracking-widest text-gold font-semibold mb-3 flex items-center gap-2">
+                <div class="mb-4 bg-luxury-navy/40 rounded-xl p-3.5 border border-slate-800/80">
+                    <h3 class="text-[10px] uppercase tracking-widest text-gold font-semibold mb-2.5 flex items-center gap-2">
                         <i class="fa-solid fa-sun text-amber-400"></i> Nghi thức buổi sáng (Morning)
                     </h3>
-                    <div class="space-y-3">
-                        <label class="flex items-start gap-3 cursor-pointer text-sm text-slate-300 hover:text-white transition-all">
-                            <input type="checkbox" id="m-ritual-1" onchange="checkRitualCompletion()" class="mt-1 accent-gold w-4 h-4 rounded border-slate-700 bg-luxury-black text-gold">
-                            <span>Đọc sách SOGR & Thiền định mục tiêu (15 phút)</span>
+                    <div class="space-y-2">
+                        <!-- Premium card-like large touch checkbox container -->
+                        <label class="flex items-center gap-3 cursor-pointer text-xs text-slate-300 hover:text-white transition-all bg-luxury-black/30 p-2.5 rounded-lg border border-slate-850 hover:border-gold/30">
+                            <input type="checkbox" id="m-ritual-1" onchange="checkRitualCompletion()" class="accent-gold w-4 h-4 rounded border-slate-700 bg-luxury-black text-gold">
+                            <span>Đọc sách SOGR & Thiền định mục tiêu</span>
                         </label>
-                        <label class="flex items-start gap-3 cursor-pointer text-sm text-slate-300 hover:text-white transition-all">
-                            <input type="checkbox" id="m-ritual-2" onchange="checkRitualCompletion()" class="mt-1 accent-gold w-4 h-4 rounded border-slate-700 bg-luxury-black text-gold">
+                        <label class="flex items-center gap-3 cursor-pointer text-xs text-slate-300 hover:text-white transition-all bg-luxury-black/30 p-2.5 rounded-lg border border-slate-850 hover:border-gold/30">
+                            <input type="checkbox" id="m-ritual-2" onchange="checkRitualCompletion()" class="accent-gold w-4 h-4 rounded border-slate-700 bg-luxury-black text-gold">
                             <span>Viết tối thiểu 10 điều biết ơn sâu sắc</span>
                         </label>
-                        <label class="flex items-start gap-3 cursor-pointer text-sm text-slate-300 hover:text-white transition-all">
-                            <input type="checkbox" id="m-ritual-3" onchange="checkRitualCompletion()" class="mt-1 accent-gold w-4 h-4 rounded border-slate-700 bg-luxury-black text-gold">
-                            <span>Đọc to Thẻ Mục Tiêu với niềm cảm hứng mãnh liệt</span>
+                        <label class="flex items-center gap-3 cursor-pointer text-xs text-slate-300 hover:text-white transition-all bg-luxury-black/30 p-2.5 rounded-lg border border-slate-850 hover:border-gold/30">
+                            <input type="checkbox" id="m-ritual-3" onchange="checkRitualCompletion()" class="accent-gold w-4 h-4 rounded border-slate-700 bg-luxury-black text-gold">
+                            <span>Đọc to Thẻ Mục Tiêu với niềm cảm hứng</span>
                         </label>
                     </div>
                 </div>
 
                 <!-- Night Rituals -->
-                <div class="mb-5 bg-luxury-navy/40 rounded-xl p-4 border border-slate-800">
-                    <h3 class="text-xs uppercase tracking-widest text-indigo-400 font-semibold mb-3 flex items-center gap-2">
+                <div class="mb-4 bg-luxury-navy/40 rounded-xl p-3.5 border border-slate-800/80">
+                    <h3 class="text-[10px] uppercase tracking-widest text-indigo-400 font-semibold mb-2.5 flex items-center gap-2">
                         <i class="fa-solid fa-moon text-indigo-400"></i> Nghi thức buổi tối (Night)
                     </h3>
-                    <div class="space-y-3">
-                        <label class="flex items-start gap-3 cursor-pointer text-sm text-slate-300 hover:text-white transition-all">
-                            <input type="checkbox" id="n-ritual-1" onchange="checkRitualCompletion()" class="mt-1 accent-gold w-4 h-4 rounded border-slate-700 bg-luxury-black text-gold">
-                            <span>Hình dung Bức tranh Tâm trí (Mental Movie) trước khi ngủ</span>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-3 cursor-pointer text-xs text-slate-300 hover:text-white transition-all bg-luxury-black/30 p-2.5 rounded-lg border border-slate-850 hover:border-gold/30">
+                            <input type="checkbox" id="n-ritual-1" onchange="checkRitualCompletion()" class="accent-gold w-4 h-4 rounded border-slate-700 bg-luxury-black text-gold">
+                            <span>Hình dung Bức tranh Tâm trí trước khi ngủ</span>
                         </label>
-                        <label class="flex items-start gap-3 cursor-pointer text-sm text-slate-300 hover:text-white transition-all">
-                            <input type="checkbox" id="n-ritual-2" onchange="checkRitualCompletion()" class="mt-1 accent-gold w-4 h-4 rounded border-slate-700 bg-luxury-black text-gold">
-                            <span>Biết ơn tất cả các thành tựu và bài học trong ngày</span>
+                        <label class="flex items-center gap-3 cursor-pointer text-xs text-slate-300 hover:text-white transition-all bg-luxury-black/30 p-2.5 rounded-lg border border-slate-850 hover:border-gold/30">
+                            <input type="checkbox" id="n-ritual-2" onchange="checkRitualCompletion()" class="accent-gold w-4 h-4 rounded border-slate-700 bg-luxury-black text-gold">
+                            <span>Biết ơn các thành tựu và bài học trong ngày</span>
                         </label>
-                        <label class="flex items-start gap-3 cursor-pointer text-sm text-slate-300 hover:text-white transition-all">
-                            <input type="checkbox" id="n-ritual-3" onchange="checkRitualCompletion()" class="mt-1 accent-gold w-4 h-4 rounded border-slate-700 bg-luxury-black text-gold">
-                            <span>Tự kỷ ám thị & Đắm mình vào cảm xúc hạnh phúc, dư dả</span>
+                        <label class="flex items-center gap-3 cursor-pointer text-xs text-slate-300 hover:text-white transition-all bg-luxury-black/30 p-2.5 rounded-lg border border-slate-850 hover:border-gold/30">
+                            <input type="checkbox" id="n-ritual-3" onchange="checkRitualCompletion()" class="accent-gold w-4 h-4 rounded border-slate-700 bg-luxury-black text-gold">
+                            <span>Tự kỷ ám thị & Đắm mình vào sự dư dả</span>
                         </label>
                     </div>
                 </div>
 
                 <!-- Complete Button -->
                 <div class="flex flex-col gap-3">
-                    <button id="btn-complete-day" disabled onclick="completeDay()" class="w-full py-3 bg-slate-800 text-slate-500 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-not-allowed">
-                        <i class="fa-solid fa-check-double"></i> Xác Nhận Hoàn Thành Ngày
+                    <button id="btn-complete-day" disabled onclick="completeDay()" class="w-full py-3 bg-slate-800 text-slate-500 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-not-allowed min-h-[44px]">
+                        <i class="fa-solid fa-check-double text-xs"></i> Xác Nhận Hoàn Thành Ngày
                     </button>
                     
                     <!-- Cloud Sync Panel Link -->
-                    <button onclick="openCloudModal()" class="w-full py-2 border border-slate-800/80 hover:border-gold/40 text-slate-400 hover:text-gold rounded-xl text-xs transition-all flex items-center justify-center gap-2">
+                    <button onclick="openCloudModal()" class="w-full py-2.5 border border-slate-800/80 hover:border-gold/40 text-slate-400 hover:text-gold rounded-xl text-xs transition-all flex items-center justify-center gap-2 min-h-[38px]">
                         <i class="fa-solid fa-gears"></i> Quản lý Đồng bộ Đám mây
                     </button>
                 </div>
-                <p id="streak-warning" class="text-[11px] text-slate-500 text-center mt-3 italic">Hãy hoàn thành tất cả 6 nghi thức trên để xác nhận kỷ luật ngày hôm nay.</p>
+                <p id="streak-warning" class="text-[10px] text-slate-500 text-center mt-2.5 italic">Hãy hoàn thành tất cả 6 nghi thức trên để xác nhận kỷ luật ngày hôm nay.</p>
             </div>
 
         </section>
@@ -393,104 +412,105 @@
 
     <!-- PREMIUM CLOUD SETTINGS MODAL (GLASSMORPHISM) -->
     <div id="cloud-settings-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-        <div class="bg-luxury-card border border-slate-800/80 w-full max-w-lg rounded-2xl p-6 gold-glow relative max-h-[90vh] overflow-y-auto">
+        <div class="bg-luxury-card border border-slate-800/80 w-full max-w-lg rounded-2xl p-5 sm:p-6 gold-glow relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeCloudModal()" class="absolute top-4 right-4 text-slate-500 hover:text-slate-200 transition-colors">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
             
-            <h3 class="text-xl font-serif text-gold-light mb-2 flex items-center gap-2.5">
-                <i class="fa-solid fa-cloud-arrow-up text-gold"></i> Thiết lập Đồng bộ Đám mây
+            <h3 class="text-base sm:text-lg font-serif text-gold-light mb-1.5 flex items-center gap-2.5">
+                <i class="fa-solid fa-cloud-arrow-up text-gold text-base"></i> Thiết lập Đồng bộ Đám mây
             </h3>
-            <p class="text-xs text-slate-400 mb-6 leading-relaxed">Đồng bộ kịch bản tâm lý, thẻ mục tiêu 3D và tiến trình kỷ luật của bạn trên mọi thiết bị.</p>
+            <p class="text-[11px] text-slate-400 mb-4 leading-relaxed">Đồng bộ kịch bản tâm lý, thẻ mục tiêu 3D và tiến trình kỷ luật của bạn trên mọi thiết bị.</p>
             
             <!-- SECTION A: SYNC ID INTERACTION -->
-            <div class="bg-luxury-navy/40 rounded-xl p-4 border border-slate-800 mb-6">
-                <h4 class="text-xs uppercase tracking-widest text-gold font-bold mb-3 flex items-center justify-between">
+            <div class="bg-luxury-navy/40 rounded-xl p-3.5 border border-slate-800 mb-5">
+                <h4 class="text-[10px] uppercase tracking-widest text-gold font-bold mb-2 flex items-center justify-between">
                     <span>1. Mã ID Đồng bộ Cá nhân</span>
-                    <i class="fa-solid fa-id-badge text-gold/60"></i>
+                    <i class="fa-solid fa-id-badge text-gold/60 text-xs"></i>
                 </h4>
-                <p class="text-[11px] text-slate-400 mb-3">Copy ID này từ máy tính sang điện thoại để kế thừa tiến trình luyện tập của bạn.</p>
+                <p class="text-[10px] text-slate-400 mb-3">Copy ID này từ máy tính sang điện thoại để kế thừa tiến trình luyện tập của bạn.</p>
                 
                 <!-- Display & Input Field combined for premium flexibility -->
                 <div class="flex gap-2">
                     <input type="text" id="custom-sync-id-input" 
-                        class="flex-1 bg-luxury-black border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-300 focus:outline-none focus:border-gold/50" 
+                        class="flex-1 bg-luxury-black border border-slate-800 rounded-lg px-2.5 py-2 text-xs font-mono text-slate-300 focus:outline-none focus:border-gold/50" 
                         placeholder="Nhập hoặc dán mã ID đồng bộ của bạn...">
-                    <button onclick="applyCustomSyncId()" class="px-3.5 py-2 bg-gold text-luxury-black text-xs font-semibold rounded-lg hover:brightness-110 transition-all">
+                    <button onclick="applyCustomSyncId()" class="px-3.5 py-2 bg-gold text-luxury-black text-xs font-semibold rounded-lg hover:brightness-110 transition-all min-h-[36px]">
                         Kết nối ID
                     </button>
                 </div>
                 
                 <div class="mt-3 flex justify-between items-center text-[10px] text-slate-500 font-mono">
                     <span>ID hiện tại: <strong id="current-id-string" class="text-gold-light">Đang khởi tạo...</strong></span>
-                    <button onclick="copyCurrentUserId()" class="text-slate-400 hover:text-gold transition-colors flex items-center gap-1">
+                    <button onclick="copyCurrentUserId()" class="text-slate-400 hover:text-gold transition-colors flex items-center gap-1.5">
                         <i class="fa-regular fa-copy"></i> Sao chép ID
                     </button>
                 </div>
             </div>
 
             <!-- SECTION B: CUSTOM FIREBASE CONFIG FOR GITHUB PAGES -->
-            <div class="bg-luxury-navy/40 rounded-xl p-4 border border-slate-800">
-                <h4 class="text-xs uppercase tracking-widest text-gold font-bold mb-2 flex items-center justify-between">
+            <div class="bg-luxury-navy/40 rounded-xl p-3.5 border border-slate-800">
+                <h4 class="text-[10px] uppercase tracking-widest text-gold font-bold mb-2 flex items-center justify-between">
                     <span>2. Máy chủ Đám mây (Firebase)</span>
-                    <i class="fa-solid fa-server text-gold/60"></i>
+                    <i class="fa-solid fa-server text-gold/60 text-xs"></i>
                 </h4>
-                <p class="text-[11px] text-slate-400 mb-3 leading-relaxed">Để tự chạy máy chủ lưu trữ dữ liệu cá nhân trên **GitHub Pages**, bạn chỉ cần dán cấu hình Firebase của bạn vào đây. Hệ thống sẽ kết nối tự động.</p>
+                <p class="text-[10px] text-slate-400 mb-2 leading-relaxed">Để tự chạy máy chủ lưu trữ dữ liệu cá nhân trên **GitHub Pages**, bạn chỉ cần dán cấu hình Firebase của bạn vào đây. Hệ thống sẽ kết nối tự động.</p>
                 
                 <textarea id="custom-firebase-config-input" 
-                    class="w-full h-32 bg-luxury-black border border-slate-800 rounded-lg p-2.5 text-[10px] font-mono text-slate-400 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/10 resize-none mb-3"
+                    class="w-full h-28 bg-luxury-black border border-slate-800 rounded-lg p-2.5 text-[9px] font-mono text-slate-400 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/10 resize-none mb-3"
                     placeholder='Dán đoạn mã config dạng JSON hoặc SDK vào đây:&#10;{&#10;  "apiKey": "...",&#10;  "authDomain": "...",&#10;  "projectId": "..."&#10;}'></textarea>
                 
                 <div class="flex gap-2">
-                    <button onclick="saveCustomFirebaseConfig()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition-all">
+                    <button onclick="saveCustomFirebaseConfig()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition-all min-h-[36px]">
                         Cập nhật máy chủ
                     </button>
-                    <button onclick="clearCustomFirebaseConfig()" class="py-2 px-3 border border-slate-800 hover:border-rose-800/40 text-slate-500 hover:text-rose-400 text-xs rounded-lg transition-all">
+                    <button onclick="clearCustomFirebaseConfig()" class="py-2 px-3 border border-slate-800 hover:border-rose-800/40 text-slate-500 hover:text-rose-400 text-xs rounded-lg transition-all min-h-[36px]">
                         Reset mặc định
                     </button>
                 </div>
             </div>
 
-            <div class="mt-6 flex justify-end">
-                <button onclick="closeCloudModal()" class="px-5 py-2 bg-gold/15 hover:bg-gold/25 border border-gold/30 text-gold text-xs font-semibold rounded-lg transition-all">
+            <div class="mt-5 flex justify-end">
+                <button onclick="closeCloudModal()" class="px-4 py-2 bg-gold/15 hover:bg-gold/25 border border-gold/30 text-gold text-xs font-semibold rounded-lg transition-all">
                     Hoàn tất thiết lập
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- CINEMA SCREEN (FIXED SCROLL LAYOUT BUG RESOLVED) -->
-    <div id="cinema-container" class="hidden fixed inset-0 z-50 bg-black flex-col justify-between p-6">
-        <!-- Floating Controls Panel -->
-        <div class="w-full flex items-center justify-between bg-zinc-950/80 backdrop-blur-md px-6 py-4 rounded-2xl border border-zinc-800 text-slate-100 max-w-4xl mx-auto mt-4 transition-all duration-300 hover:opacity-100 opacity-60">
-            <div class="flex items-center gap-4">
-                <span class="text-sm font-serif font-bold text-gold tracking-wide">Rạp Chiếu Tâm Trí</span>
-                <div class="h-4 w-[1px] bg-zinc-800"></div>
+    <!-- CINEMA SCREEN (RE-ENGINEERED SMOOTH MOBILE SCROLLER) -->
+    <div id="cinema-container" class="hidden fixed inset-0 z-50 bg-black flex flex-col justify-between p-4 sm:p-6">
+        <!-- Floating Controls Panel - Optimized with responsive padding for mobile notches -->
+        <div class="w-full flex items-center justify-between bg-zinc-950/80 backdrop-blur-md px-4 py-3 sm:px-6 sm:py-4 rounded-xl border border-zinc-800 text-slate-100 max-w-4xl mx-auto mt-4 transition-all duration-300 hover:opacity-100 opacity-60">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <span class="text-xs sm:text-sm font-serif font-bold text-gold tracking-wide">Rạp Chiếu Tâm Trí</span>
+                <div class="hidden sm:block h-4 w-[1px] bg-zinc-800"></div>
                 <!-- Speed controls -->
-                <div class="flex items-center gap-2">
-                    <span class="text-xs text-slate-400">Tốc độ cuộn:</span>
-                    <button onclick="setScrollSpeed(0.5)" id="speed-0.5" class="px-2 py-0.5 text-xs rounded border border-zinc-700 hover:border-gold hover:text-gold transition-all">Chậm</button>
-                    <button onclick="setScrollSpeed(1.0)" id="speed-1.0" class="px-2 py-0.5 text-xs rounded border border-gold text-gold transition-all">Vừa</button>
-                    <button onclick="setScrollSpeed(1.8)" id="speed-1.8" class="px-2 py-0.5 text-xs rounded border border-zinc-700 hover:border-gold hover:text-gold transition-all">Nhanh</button>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[10px] sm:text-xs text-slate-400">Tốc độ:</span>
+                    <button onclick="setScrollSpeed(0.5)" id="speed-0.5" class="px-1.5 py-0.5 text-[10px] rounded border border-zinc-700 hover:border-gold hover:text-gold transition-all">Chậm</button>
+                    <button onclick="setScrollSpeed(1.0)" id="speed-1.0" class="px-1.5 py-0.5 text-[10px] rounded border border-gold text-gold transition-all">Vừa</button>
+                    <button onclick="setScrollSpeed(1.8)" id="speed-1.8" class="px-1.5 py-0.5 text-[10px] rounded border border-zinc-700 hover:border-gold hover:text-gold transition-all">Nhanh</button>
                 </div>
             </div>
             
-            <button onclick="exitCinemaMode()" class="px-4 py-1.5 bg-rose-950 text-rose-300 hover:bg-rose-900 text-xs rounded-xl transition-all border border-rose-800/40">
-                <i class="fa-solid fa-xmark"></i> Thoát Rạp Chiếu
+            <button onclick="exitCinemaMode()" class="px-3 py-1.5 bg-rose-950 text-rose-300 hover:bg-rose-900 text-[10px] sm:text-xs rounded-lg transition-all border border-rose-800/40">
+                <i class="fa-solid fa-xmark"></i> Thoát
             </button>
         </div>
 
-        <!-- Scroll viewport with fixed full-width centering geometry -->
-        <div id="cinema-scroll-viewport" class="flex-1 overflow-y-hidden relative py-20">
-            <div id="cinema-text-wrapper" class="absolute w-full max-w-4xl px-6 left-1/2 -translate-x-1/2 text-center">
-                <p id="cinema-scrolling-content" class="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-amber-100/90 font-serif whitespace-pre-wrap selection:bg-gold/30 selection:text-gold-light leading-loose text-center">
+        <!-- Scroll viewport with bulletproof relative hardware-accelerated wrapper -->
+        <div id="cinema-scroll-viewport" class="flex-1 overflow-hidden relative w-full h-full my-4">
+            <!-- GPU Accelerated Transform Layer -->
+            <div id="cinema-text-wrapper" class="absolute px-4 text-center w-full max-w-3xl" style="left: 50%; top: 0; transform: translate3d(-50%, 0, 0);">
+                <p id="cinema-scrolling-content" class="text-lg sm:text-2xl md:text-3xl lg:text-4xl text-amber-100/90 font-serif whitespace-pre-wrap selection:bg-gold/30 selection:text-gold-light leading-relaxed sm:leading-loose text-center">
                     <!-- Loaded dynamically -->
                 </p>
             </div>
         </div>
 
         <!-- Footer / Ambient Hint -->
-        <div class="text-center text-zinc-600 text-[10px] pb-4 font-mono tracking-widest">
+        <div class="text-center text-zinc-600 text-[9px] pb-2 font-mono tracking-widest safe-pb">
             TÂM THỨC THỊNH VƯỢNG • SOGR COGNITIVE REPROGRAMMING
         </div>
     </div>
@@ -555,21 +575,34 @@
         const btnCompleteDay = document.getElementById('btn-complete-day');
 
         // Firebase Setup configuration
-        const defaultAppId = typeof __app_id !== 'undefined' ? __app_id : 'sogr-visualizer';
+        const defaultAppId = typeof __app_id !== 'undefined' ? __app_id : 'sog-visualizer';
         
         let db = null;
         let auth = null;
         let currentUser = null;
         let cloudSaveTimeout = null;
 
-        // Try getting system config or custom pasted user config from localstorage
+        // Binds user's newly created Firebase project directly as the out-of-the-box fallback config
         const storedCustomConfig = localStorage.getItem('sogr_custom_firebase_config_v1');
         const envConfig = typeof __firebase_config !== 'undefined' && __firebase_config ? __firebase_config : null;
-        const finalConfigString = storedCustomConfig || envConfig;
+        const personalFallbackConfig = JSON.stringify({
+            apiKey: "AIzaSyC734csm8EEaOWJBAe9VF1QzHr5DW7bdzU",
+            authDomain: "sogr-visualizer-personal.firebaseapp.com",
+            projectId: "sogr-visualizer-personal",
+            storageBucket: "sogr-visualizer-personal.firebasestorage.app",
+            messagingSenderId: "273068175923",
+            appId: "1:273068175923:web:b982d7f8219d65f0c46946"
+        });
+
+        // Resolve highest priority configuration
+        const finalConfigString = storedCustomConfig || envConfig || personalFallbackConfig;
 
         // Populate Custom configuration box if loaded on settings modal init
         if (storedCustomConfig) {
             document.getElementById('custom-firebase-config-input').value = storedCustomConfig;
+        } else {
+            // Use personal configuration preset so the textbox looks pre-filled and premium
+            document.getElementById('custom-firebase-config-input').value = personalFallbackConfig;
         }
 
         // Initialize Firebase services gracefully if configuration exists
@@ -862,6 +895,7 @@
             }
         }
 
+        // Clear custom config to reset back to SOGR standard fallback configuration
         function clearCustomFirebaseConfig() {
             localStorage.removeItem('sogr_custom_firebase_config_v1');
             showNotification("Đã reset cấu hình!", "Đã khôi phục cài đặt mặc định gốc. Trang đang tải lại...", "fa-circle-check");
@@ -973,11 +1007,11 @@
         }
 
         function resetAudioButtons() {
-            document.getElementById('btn-alpha').className = "py-3 px-4 rounded-xl border border-slate-700/60 hover:border-gold/50 bg-luxury-navy/40 hover:bg-gold/5 text-slate-300 hover:text-gold text-sm font-medium transition-all flex justify-between items-center";
+            document.getElementById('btn-alpha').className = "py-3 px-4 rounded-xl border border-slate-700/60 hover:border-gold/50 bg-luxury-navy/40 hover:bg-gold/5 text-slate-300 hover:text-gold text-xs font-medium transition-all flex justify-between items-center";
             document.getElementById('btn-theta').className = "py-3 px-4 rounded-xl border border-slate-700/60 hover:border-gold/50 bg-luxury-navy/40 hover:bg-gold/5 text-slate-300 hover:text-gold text-sm font-medium transition-all flex justify-between items-center";
         }
 
-        // 6. CINEMA MODE (AUTOSCROLL SCREEN - FIXED WIDTH WRAPPING BUG)
+        // 6. CINEMA MODE (AUTOSCROLL SCREEN - FIXED WIDTH WRAPPING BUG RESOLVED)
         let scrollSpeedMultiplier = 1.0;
         let currentScrollY = 0;
         let isScrolling = false;
@@ -1008,38 +1042,49 @@
             // Begin Autoscroll setup
             setTimeout(() => {
                 startScroller();
-            }, 1000);
+            }, 300); // Trigger promptly
         }
 
         function setScrollSpeed(speed) {
             scrollSpeedMultiplier = speed;
             // Update active state visualizer on Cinema Panel
             document.querySelectorAll("[id^='speed-']").forEach(btn => {
-                btn.className = "px-2 py-0.5 text-xs rounded border border-zinc-700 hover:border-gold hover:text-gold transition-all";
+                btn.className = "px-1.5 py-0.5 text-[10px] rounded border border-zinc-700 hover:border-gold hover:text-gold transition-all";
             });
-            document.getElementById(`speed-${speed}`).className = "px-2 py-0.5 text-xs rounded border border-gold text-gold transition-all";
+            document.getElementById(`speed-${speed}`).className = "px-1.5 py-0.5 text-[10px] rounded border border-gold text-gold transition-all";
         }
 
+        // FULLY ADAPTIVE STABLE TELEPROMPTER SCROLL SYSTEM - GPU ACCELERATED TRANSLATION
         function startScroller() {
             const viewport = document.getElementById('cinema-scroll-viewport');
             const textWrapper = document.getElementById('cinema-text-wrapper');
             
-            // Set starting point (from bottom of the screen)
-            currentScrollY = viewport.clientHeight;
-            textWrapper.style.top = `${currentScrollY}px`;
+            // Dynamically evaluate a safe starting height if the element hasn't finished active rendering yet
+            let viewHeight = viewport.clientHeight || window.innerHeight || 600;
+
+            // Start the scroll path with the text already partially visible in the lower half (65%)
+            // This prevents a frustrating blank screen for the user upon start
+            currentScrollY = viewHeight * 0.65;
+            textWrapper.style.transform = `translate3d(-50%, ${currentScrollY}px, 0)`;
             
             isScrolling = true;
 
             function scrollLoop() {
                 if (!isScrolling) return;
 
-                // Adjust pixel distance incrementally per frame
-                currentScrollY -= (0.55 * scrollSpeedMultiplier);
-                textWrapper.style.top = `${currentScrollY}px`;
+                // Move smoothly per frame
+                currentScrollY -= (0.75 * scrollSpeedMultiplier);
+                
+                // Use translate3d for buttery-smooth 60fps scrolling on iOS & Android GPUs
+                textWrapper.style.transform = `translate3d(-50%, ${currentScrollY}px, 0)`;
 
-                // If text scrolls off-screen on the top, reset positions
-                if (currentScrollY + textWrapper.clientHeight < -50) {
-                    currentScrollY = viewport.clientHeight;
+                // Adaptively recalculate limits on every frame to support responsive orientation flips or resizing safely
+                let wrapperHeight = textWrapper.clientHeight || 1200;
+                let currentViewHeight = viewport.clientHeight || window.innerHeight || 600;
+
+                // Reset back to bottom once the whole text block scrolls completely off-screen upwards
+                if (currentScrollY + wrapperHeight < -10) {
+                    currentScrollY = currentViewHeight;
                 }
 
                 requestAnimationFrame(scrollLoop);
@@ -1094,10 +1139,10 @@
 
             if (allChecked) {
                 btnCompleteDay.disabled = false;
-                btnCompleteDay.className = "w-full py-3 bg-gradient-to-r from-gold-dark to-gold hover:brightness-110 text-luxury-black font-semibold rounded-xl text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg";
+                btnCompleteDay.className = "w-full py-3 bg-gradient-to-r from-gold-dark to-gold hover:brightness-110 text-luxury-black font-semibold rounded-xl text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg";
             } else {
                 btnCompleteDay.disabled = true;
-                btnCompleteDay.className = "w-full py-3 bg-slate-800 text-slate-500 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-not-allowed";
+                btnCompleteDay.className = "w-full py-3 bg-slate-800 text-slate-500 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-not-allowed";
             }
         }
 
@@ -1153,9 +1198,9 @@
         // Generic Premium Notification Alert System (Browser Dialog Replacement)
         function showNotification(title, desc, icon = "fa-circle-check") {
             const notify = document.createElement('div');
-            notify.className = "fixed bottom-6 right-6 z-50 bg-luxury-card border-2 border-gold text-slate-100 p-5 rounded-2xl flex items-center gap-4 gold-glow transition-all duration-500 transform translate-y-12 opacity-0";
+            notify.className = "fixed bottom-6 right-6 z-50 bg-luxury-card border-2 border-gold text-slate-100 p-5 rounded-2xl flex items-center gap-4 gold-glow transition-all duration-500 transform translate-y-12 opacity-0 max-w-[90vw]";
             notify.innerHTML = `
-                <div class="p-2.5 bg-gold/15 rounded-full text-gold">
+                <div class="p-2.5 bg-gold/15 rounded-full text-gold shrink-0">
                     <i class="fa-solid ${icon} text-lg"></i>
                 </div>
                 <div>
@@ -1178,6 +1223,7 @@
             updateSyncIdDisplay();
         }
 
+        // Hide Cloud Settings Panel
         function closeCloudModal() {
             document.getElementById('cloud-settings-modal').classList.add('hidden');
         }
