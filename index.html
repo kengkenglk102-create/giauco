@@ -574,8 +574,8 @@
         const streakCountBadge = document.getElementById('streak-count-badge');
         const btnCompleteDay = document.getElementById('btn-complete-day');
 
-        // Firebase Setup configuration
-        const defaultAppId = typeof __app_id !== 'undefined' ? __app_id : 'sog-visualizer';
+        // Firebase Setup configuration (App ID Unification Fixes)
+        const defaultAppId = typeof __app_id !== 'undefined' ? __app_id : 'sogr-visualizer';
         
         let db = null;
         let auth = null;
@@ -842,6 +842,7 @@
             syncRitualCheckboxes();
         }
 
+        // Save states back to LocalStorage
         function saveStateToStorage() {
             appState.goalText = goalTextInput.value;
             appState.mentalMovie = mentalMovieInput.value;
@@ -1007,7 +1008,7 @@
         }
 
         function resetAudioButtons() {
-            document.getElementById('btn-alpha').className = "py-3 px-4 rounded-xl border border-slate-700/60 hover:border-gold/50 bg-luxury-navy/40 hover:bg-gold/5 text-slate-300 hover:text-gold text-xs font-medium transition-all flex justify-between items-center";
+            document.getElementById('btn-alpha').className = "py-3 px-4 rounded-xl border border-slate-700/60 hover:border-gold/50 bg-luxury-navy/40 hover:bg-gold/5 text-slate-300 hover:text-gold text-sm font-medium transition-all flex justify-between items-center";
             document.getElementById('btn-theta').className = "py-3 px-4 rounded-xl border border-slate-700/60 hover:border-gold/50 bg-luxury-navy/40 hover:bg-gold/5 text-slate-300 hover:text-gold text-sm font-medium transition-all flex justify-between items-center";
         }
 
