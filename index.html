@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tâm Thức Thịnh Vượng - SOGR Visualizer</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            DEFAULT: '#D4AF37',
+                            light: '#F3E5AB',
+                            dark: '#AA7C11',
+                            glow: 'rgba(212, 175, 55, 0.25)'
+                        },
+                        luxury: {
+                            black: '#0A0A0C',
+                            navy: '#0F1016',
+                            card: '#161720',
+                            accent: '#1D2030'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Premium Ambient Background */
+        body {
+            background: radial-gradient(circle at 50% 50%, #161725 0%, #08080C 100%);
+            background-attachment: fixed;
+        }
+
+        /* Ambient Glow effect */
+        .gold-glow {
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.15);
+        }
+        .gold-border-gradient {
+            border-image: linear-gradient(to right, #AA7C11, #D4AF37, #F3E5AB, #D4AF37, #AA7C11) 1;
+        }
+
+        /* 3D Card Flip CSS */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .preserve-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(10, 10, 12, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D4AF37;
+            border-radius: 3px;
+        }
+
+        /* Cinema Autoscroll Styles */
+        #cinema-container:fullscreen {
+            background: #000000 !important;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Print Media Setup */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-card-section, #print-card-section * {
+                visibility: visible;
+            }
+            #print-card-section {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                display: flex !important;
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+                background: white !important;
+                color: black !important;
+            }
+            .print-card-box {
+                width: 8.5cm;
+                height: 5.5cm;
+                border: 2px double #000000 !important;
+                padding: 10px;
+                box-sizing: border-box;
+                background: white !important;
+                color: black !important;
+                font-family: 'Playfair Display', serif;
+                font-size: 8px;
+                line-height: 1.3;
+                text-align: justify;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                page-break-inside: avoid;
+            }
+            .print-card-title {
+                font-weight: bold;
+                text-align: center;
+                border-bottom: 1px solid #000000;
+                margin-bottom: 4px;
+                font-size: 9px;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-100 font-sans min-h-screen pb-12 overflow-x-hidden">
+
+    <!-- Header Section -->
+    <header class="border-b border-slate-800/60 bg-luxury-black/60 backdrop-blur-md sticky top-0 z-30 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="text-center sm:text-left flex flex-col sm:flex-row items-center gap-4">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-serif font-bold bg-gradient-to-r from-amber-200 via-gold to-gold-dark bg-clip-text text-transparent tracking-wide">
+                        Tâm Thức Thịnh Vượng
+                    </h1>
+                    <p class="text-xs text-slate-400 tracking-widest uppercase mt-1">SOGR Visualizer • Science of Getting Rich</p>
+                </div>
+                <!-- Dynamic Cloud Sync Status Badge -->
+                <div id="sync-status-badge" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-800 text-xs text-slate-400 bg-luxury-card/50 transition-all">
+                    <i class="fa-solid fa-cloud"></i>
+                    <span id="sync-status-text">Ngoại tuyến</span>
+                </div>
+            </div>
+            
+            <!-- Quick Actions Header -->
+            <div class="flex items-center gap-3">
+                <button onclick="triggerPrint()" class="px-3 py-1.5 rounded-lg border border-slate-700 hover:border-gold text-slate-300 hover:text-gold text-sm transition-all flex items-center gap-2 bg-luxury-card/50">
+                    <i class="fa-solid fa-print"></i> In Thẻ Mục Tiêu
+                </button>
+                <div class="h-6 w-[1px] bg-slate-800"></div>
+                <div id="streak-badge" class="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-gold-dark/20 to-gold/20 border border-gold/40 rounded-full">
+                    <i class="fa-solid fa-fire text-gold animate-pulse"></i>
+                    <span class="text-sm font-medium text-gold-light"><span id="streak-count-badge">0</span> Ngày liên tiếp</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="max-w-7xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- LEFT COLUMN: 3D Card / Sound Synth -->
+        <section class="lg:col-span-7 flex flex-col gap-8">
+            
+            <!-- SECTION 1: Interactive 3D Goal Card -->
+            <div class="bg-luxury-card/30 backdrop-blur-md rounded-2xl p-6 border border-slate-800/80 gold-glow relative overflow-hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-serif text-gold-light font-medium flex items-center gap-2">
+                        <i class="fa-solid fa-credit-card"></i> Thẻ Mục Tiêu 3D (SOGR Goal Card)
+                    </h2>
+                    <div class="flex gap-2">
+                        <button onclick="flipCard()" class="px-3 py-1 text-xs bg-gold/10 hover:bg-gold/20 text-gold border border-gold/30 rounded-md transition-all">
+                            <i class="fa-solid fa-rotate"></i> Lật Thẻ
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3D Container -->
+                <div class="perspective-1000 w-full h-80 sm:h-72">
+                    <div id="goal-card-inner" class="preserve-3d w-full h-full relative cursor-pointer">
+                        
+                        <!-- CARD FRONT -->
+                        <div class="backface-hidden absolute inset-0 w-full h-full bg-gradient-to-br from-luxury-navy to-luxury-black border-2 border-dashed border-gold/40 rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl">
+                            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,0.06),transparent)] rounded-xl pointer-events-none"></div>
+                            <div class="flex justify-between items-start">
+                                <span class="text-[10px] uppercase tracking-widest text-gold/60 font-mono">Bản thiết kế tài chính</span>
+                                <i class="fa-solid fa-crown text-gold/40"></i>
+                            </div>
+                            
+                            <!-- Editable Goal Area -->
+                            <div class="my-auto">
+                                <textarea id="goal-text-input" 
+                                    class="w-full bg-transparent text-center text-slate-200 font-serif text-sm sm:text-base leading-relaxed focus:outline-none resize-none h-40"
+                                    placeholder="Nhập mục tiêu tài chính của bạn tại đây..."></textarea>
+                            </div>
+
+                            <div class="flex justify-between items-end border-t border-slate-800/80 pt-3">
+                                <span class="text-[10px] text-slate-500 font-serif italic">"Quyền được giàu có..."</span>
+                                <span class="text-[9px] text-gold/80 font-mono tracking-widest">SOGR VISUALIZER</span>
+                            </div>
+                        </div>
+
+                        <!-- CARD BACK -->
+                        <div class="backface-hidden rotate-y-180 absolute inset-0 w-full h-full bg-gradient-to-br from-luxury-black to-slate-950 border-2 border-double border-gold/60 rounded-xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl">
+                            <div class="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(212,175,55,0.06),transparent)] rounded-xl pointer-events-none"></div>
+                            <div class="flex justify-between items-start border-b border-slate-900 pb-2">
+                                <span class="text-[10px] uppercase tracking-widest text-gold font-mono">3 Nguyên lý Đức tin</span>
+                                <i class="fa-solid fa-circle-nodes text-gold/50"></i>
+                            </div>
+
+                            <!-- Non-editable / Read-only Principles text but elegantly presented -->
+                            <div class="text-[11px] sm:text-xs text-slate-300 leading-relaxed font-serif text-justify my-auto space-y-2 py-2 overflow-y-auto max-h-44">
+                                <p><strong class="text-gold">1.</strong> Có một chất liệu tư duy tạo nên vạn vật, lấp đầy mọi khoảng không gian của vũ trụ.</p>
+                                <p><strong class="text-gold">2.</strong> Một suy nghĩ bên trong vật chất này sẽ tạo ra sự vật được hình dung bởi suy nghĩ đó.</p>
+                                <p><strong class="text-gold">3.</strong> Tôi có thể tạo hình các sự vật trong suy nghĩ của mình, và bằng cách khắc ghi nó lên Vật chất Vô hình, tôi khiến cho sự vật tôi nghĩ đến được tạo ra trong thực tế.</p>
+                            </div>
+
+                            <div class="text-center text-[9px] text-gold/40 border-t border-slate-900 pt-2 font-mono tracking-wider">
+                                THE SCIENCE OF GETTING RICH
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <p class="text-center text-xs text-slate-500 mt-3 italic"><i class="fa-solid fa-circle-info"></i> Nhấp trực tiếp vào thẻ hoặc nút "Lật Thẻ" để thay đổi góc nhìn.</p>
+            </div>
+
+            <!-- SECTION 2: Binaural Beats Generator (Optimized Layout) -->
+            <div class="bg-luxury-card/30 backdrop-blur-md rounded-2xl p-6 border border-slate-800/80 gold-glow">
+                <div class="flex flex-col md:flex-row gap-6 justify-between items-stretch">
+                    <!-- Left Side: Header & Waves Trigger Buttons -->
+                    <div class="flex-1 flex flex-col justify-between gap-4">
+                        <div>
+                            <h3 class="text-base font-serif text-gold-light mb-1 flex items-center gap-2">
+                                <i class="fa-solid fa-wave-square"></i> Máy Phát Sóng Não Binaural
+                            </h3>
+                            <p class="text-xs text-slate-400">Cộng hưởng trực tiếp tần số vào tiềm thức sâu để lập trình tư duy thịnh vượng.</p>
+                        </div>
+                        
+                        <!-- Buttons -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <button id="btn-alpha" onclick="playBinaural('alpha')" class="py-3 px-4 rounded-xl border border-slate-700/60 hover:border-gold/50 bg-luxury-navy/40 hover:bg-gold/5 text-slate-300 hover:text-gold text-sm font-medium transition-all flex justify-between items-center">
+                                <span class="flex items-center gap-2">
+                                    <i class="fa-solid fa-brain text-amber-500/80"></i> Sóng Alpha (10Hz)
+                                </span>
+                                <span class="text-xs text-slate-500 font-mono">Tĩnh tâm sâu</span>
+                            </button>
+                            <button id="btn-theta" onclick="playBinaural('theta')" class="py-3 px-4 rounded-xl border border-slate-700/60 hover:border-gold/50 bg-luxury-navy/40 hover:bg-gold/5 text-slate-300 hover:text-gold text-sm font-medium transition-all flex justify-between items-center">
+                                <span class="flex items-center gap-2">
+                                    <i class="fa-solid fa-bolt-lightning text-indigo-400"></i> Sóng Theta (6Hz)
+                                </span>
+                                <span class="text-xs text-slate-500 font-mono">Cài đặt tiềm thức</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Vertical Divider (only visible on medium screens) -->
+                    <div class="hidden md:block w-[1px] bg-slate-800/80"></div>
+
+                    <!-- Right Side: Volume & Stop controls -->
+                    <div class="w-full md:w-60 flex flex-col justify-end gap-3">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs text-slate-400">Âm lượng tai nghe</span>
+                                <span id="volume-indicator" class="text-xs text-gold font-mono font-bold">50%</span>
+                            </div>
+                            <input type="range" id="sound-volume" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume(this.value)" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-gold mb-3">
+                        </div>
+                        
+                        <button id="btn-stop-audio" onclick="stopBinaural()" class="w-full py-2.5 bg-rose-950/40 border border-rose-800/50 hover:bg-rose-900/40 text-rose-300 text-xs rounded-lg transition-all flex items-center justify-center gap-2 font-medium">
+                            <i class="fa-solid fa-stop"></i> Tắt Âm Thanh
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- RIGHT COLUMN: Mental Cinema / Ritual Tracker -->
+        <section class="lg:col-span-5 flex flex-col gap-8">
+            
+            <!-- SECTION 3: Mental Movie Cinema Panel -->
+            <div class="bg-luxury-card/30 backdrop-blur-md rounded-2xl p-6 border border-slate-800/80 relative">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-lg font-serif text-gold-light font-medium flex items-center gap-2">
+                            <i class="fa-solid fa-film"></i> Bức Tranh Tâm Trí (Mental Movie)
+                        </h2>
+                        <p class="text-xs text-slate-400">Thiết lập thế giới thực tế giả lập của riêng bạn</p>
+                    </div>
+                </div>
+
+                <!-- Text Area for Mental Movie -->
+                <div class="mb-4">
+                    <textarea id="mental-movie-input" 
+                        class="w-full h-64 bg-luxury-black/40 border border-slate-800/80 rounded-xl p-4 text-sm leading-relaxed text-slate-300 font-serif focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20 transition-all resize-none"
+                        placeholder="Hãy viết mô tả kịch bản cuộc sống giàu có lý tưởng của bạn một cách sống động nhất..."></textarea>
+                </div>
+
+                <!-- Action button for cinema mode -->
+                <button onclick="startCinemaMode()" class="w-full py-3 bg-gradient-to-r from-gold-dark via-gold to-gold-light hover:brightness-110 text-luxury-black font-semibold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(212,175,55,0.2)]">
+                    <i class="fa-solid fa-expand"></i> Kích hoạt Rạp Chiếu Tâm Trí (Full Screen)
+                </button>
+            </div>
+
+            <!-- SECTION 4: In-depth Practice Tracker (Streak) -->
+            <div class="bg-luxury-card/30 backdrop-blur-md rounded-2xl p-6 border border-slate-800/80">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-lg font-serif text-gold-light font-medium flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-check"></i> Nghi Thức Thịnh Vượng Mỗi Ngày
+                        </h2>
+                        <p class="text-xs text-slate-400">Kiên định rèn luyện để tái lập trình tư duy tiềm thức</p>
+                    </div>
+                </div>
+
+                <!-- Morning Rituals -->
+                <div class="mb-5 bg-luxury-navy/40 rounded-xl p-4 border border-slate-800">
+                    <h3 class="text-xs uppercase tracking-widest text-gold font-semibold mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-sun text-amber-400"></i> Nghi thức buổi sáng (Morning)
+                    </h3>
+                    <div class="space-y-3">
+                        <label class="flex items-start gap-3 cursor-pointer text-sm text-slate-300 hover:text-white transition-all">
+                            <input type="checkbox" id="m-ritual-1" onchange="checkRitualCompletion()" class="mt-1 accent-gold w-4 h-4 rounded border-slate-700 bg-luxury-black text-gold">
+                            <span>Đọc sách SOGR & Thiền định mục tiêu (15 phút)</span>
+                        </label>
+                        <label class="flex items-start gap-3 cursor-pointer text-sm text-slate-300 hover:text-white transition-all">
+                            <input type="checkbox" id="m-ritual-2" onchange="checkRitualCompletion()" class="mt-1 accent-gold w-4 h-4 rounded border-slate-700 bg-luxury-black text-gold">
+                            <span>Viết tối thiểu 10 điều biết ơn sâu sắc</span>
+                        </label>
+                        <label class="flex items-start gap-3 cursor-pointer text-sm text-slate-300 hover:text-white transition-all">
+                            <input type="checkbox" id="m-ritual-3" onchange="checkRitualCompletion()" class="mt-1 accent-gold w-4 h-4 rounded border-slate-700 bg-luxury-black text-gold">
+                            <span>Đọc to Thẻ Mục Tiêu với niềm cảm hứng mãnh liệt</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Night Rituals -->
+                <div class="mb-5 bg-luxury-navy/40 rounded-xl p-4 border border-slate-800">
+                    <h3 class="text-xs uppercase tracking-widest text-indigo-400 font-semibold mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-moon text-indigo-400"></i> Nghi thức buổi tối (Night)
+                    </h3>
+                    <div class="space-y-3">
+                        <label class="flex items-start gap-3 cursor-pointer text-sm text-slate-300 hover:text-white transition-all">
+                            <input type="checkbox" id="n-ritual-1" onchange="checkRitualCompletion()" class="mt-1 accent-gold w-4 h-4 rounded border-slate-700 bg-luxury-black text-gold">
+                            <span>Hình dung Bức tranh Tâm trí (Mental Movie) trước khi ngủ</span>
+                        </label>
+                        <label class="flex items-start gap-3 cursor-pointer text-sm text-slate-300 hover:text-white transition-all">
+                            <input type="checkbox" id="n-ritual-2" onchange="checkRitualCompletion()" class="mt-1 accent-gold w-4 h-4 rounded border-slate-700 bg-luxury-black text-gold">
+                            <span>Biết ơn tất cả các thành tựu và bài học trong ngày</span>
+                        </label>
+                        <label class="flex items-start gap-3 cursor-pointer text-sm text-slate-300 hover:text-white transition-all">
+                            <input type="checkbox" id="n-ritual-3" onchange="checkRitualCompletion()" class="mt-1 accent-gold w-4 h-4 rounded border-slate-700 bg-luxury-black text-gold">
+                            <span>Tự kỷ ám thị & Đắm mình vào cảm xúc hạnh phúc, dư dả</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Complete Button & Streak Log -->
+                <div class="flex flex-col gap-3">
+                    <button id="btn-complete-day" disabled onclick="completeDay()" class="w-full py-3 bg-slate-800 text-slate-500 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-not-allowed">
+                        <i class="fa-solid fa-check-double"></i> Xác Nhận Hoàn Thành Ngày
+                    </button>
+                    
+                    <!-- Copy User ID Segment for cross-device authentication -->
+                    <div class="flex items-center justify-between text-[11px] text-slate-500 font-mono border-t border-slate-800/80 pt-3">
+                        <span>Đồng bộ hóa đám mây</span>
+                        <div class="flex items-center gap-1.5 cursor-pointer hover:text-gold transition-colors" onclick="copyUserId()">
+                            <span>ID:</span>
+                            <span id="user-id-display">Chờ kết nối...</span>
+                            <i class="fa-regular fa-copy"></i>
+                        </div>
+                    </div>
+                </div>
+                <p id="streak-warning" class="text-[11px] text-slate-500 text-center mt-3 italic">Hãy hoàn thành tất cả 6 nghi thức trên để xác nhận kỷ luật ngày hôm nay.</p>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- CINEMA SCREEN (FULLSCREEN MODAL) -->
+    <div id="cinema-container" class="hidden fixed inset-0 z-50 bg-black flex-col justify-between p-6">
+        <!-- Floating Controls Panel -->
+        <div class="w-full flex items-center justify-between bg-zinc-950/80 backdrop-blur-md px-6 py-4 rounded-2xl border border-zinc-800 text-slate-100 max-w-4xl mx-auto mt-4 transition-all duration-300 hover:opacity-100 opacity-60">
+            <div class="flex items-center gap-4">
+                <span class="text-sm font-serif font-bold text-gold tracking-wide">Rạp Chiếu Tâm Trí</span>
+                <div class="h-4 w-[1px] bg-zinc-800"></div>
+                <!-- Speed controls -->
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-400">Tốc độ cuộn:</span>
+                    <button onclick="setScrollSpeed(0.5)" id="speed-0.5" class="px-2 py-0.5 text-xs rounded border border-zinc-700 hover:border-gold hover:text-gold transition-all">Chậm</button>
+                    <button onclick="setScrollSpeed(1.0)" id="speed-1.0" class="px-2 py-0.5 text-xs rounded border border-gold text-gold transition-all">Vừa</button>
+                    <button onclick="setScrollSpeed(1.8)" id="speed-1.8" class="px-2 py-0.5 text-xs rounded border border-zinc-700 hover:border-gold hover:text-gold transition-all">Nhanh</button>
+                </div>
+            </div>
+            
+            <button onclick="exitCinemaMode()" class="px-4 py-1.5 bg-rose-950 text-rose-300 hover:bg-rose-900 text-xs rounded-xl transition-all border border-rose-800/40">
+                <i class="fa-solid fa-xmark"></i> Thoát Rạp Chiếu
+            </button>
+        </div>
+
+        <!-- Scroll viewport -->
+        <div id="cinema-scroll-viewport" class="flex-1 overflow-y-hidden relative flex items-center justify-center py-20 px-4">
+            <div id="cinema-text-wrapper" class="absolute top-[80%] max-w-3xl text-center">
+                <p id="cinema-scrolling-content" class="text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-relaxed text-amber-100/90 font-serif whitespace-pre-wrap selection:bg-gold/30 selection:text-gold-light leading-loose text-center px-4">
+                    <!-- Loaded dynamically -->
+                </p>
+            </div>
+        </div>
+
+        <!-- Footer / Ambient Hint -->
+        <div class="text-center text-zinc-600 text-[10px] pb-4 font-mono tracking-widest">
+            TÂM THỨC THỊNH VƯỢNG • SOGR COGNITIVE REPROGRAMMING
+        </div>
+    </div>
+
+    <!-- PRINT SECTION: Hidden on browser, visible on Print -->
+    <div id="print-card-section" class="hidden">
+        <!-- Print Card 1 (Front Side) -->
+        <div class="print-card-box">
+            <div class="print-card-title">MỤC TIÊU TÀI CHÍNH (GOAL CARD)</div>
+            <div id="print-goal-text" style="font-size: 8px; font-style: italic; text-align: center;">
+                <!-- Filled via JS -->
+            </div>
+            <div style="font-size: 6px; text-align: right; margin-top: auto; border-top: 0.5px solid #000; padding-top: 2px;">
+                TÂM THỨC THỊNH VƯỢNG • SOGR
+            </div>
+        </div>
+
+        <!-- Print Card 2 (Back Side) -->
+        <div class="print-card-box">
+            <div class="print-card-title">3 NGUYÊN LÝ ĐỨC TIN (SOGR)</div>
+            <div style="font-size: 7px; text-align: left; padding: 2px 0;">
+                1. Có một chất liệu tư duy tạo nên vạn vật, lấp đầy mọi khoảng không gian của vũ trụ.<br>
+                2. Một suy nghĩ bên trong vật chất này sẽ tạo ra sự vật được hình dung bởi suy nghĩ đó.<br>
+                3. Tôi có thể tạo hình các sự vật trong suy nghĩ của mình, và bằng cách khắc ghi nó lên Vật chất Vô hình, tôi khiến cho sự vật tôi nghĩ đến được tạo ra trong thực tế.
+            </div>
+            <div style="font-size: 6px; text-align: right; margin-top: auto; border-top: 0.5px solid #000; padding-top: 2px;">
+                THE SCIENCE OF GETTING RICH
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC WITH FIRESTORE INTEGRATION -->
+    <script type="module">
+        // Import Firebase ES Modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // 1. DEFAULT DATA CONFIGURATION
+        const defaultGoalText = "Tôi vô cùng hạnh phúc và biết ơn lúc này khi tôi đã đạt được cột mốc 1 triệu đô-la đầu tiên ở tuổi 33, và dòng tài sản của tôi liên tục tăng trưởng mạnh mẽ vượt ngưỡng 2 triệu đô-la . Tôi đang vận hành một công việc kinh doanh tự do toàn cầu trên internet, liên tục trao đi giá trị gia tăng và mang lại cuộc sống thịnh vượng, hạnh phúc trọn vẹn cho bản thân cùng gia đình .";
+        
+        const defaultMentalMovie = "Tôi vô cùng hạnh phúc và biết ơn lúc này khi tôi đang sống một cuộc đời giàu có, tự do và trọn vẹn nhất . Tôi nhận ra quyền được giàu có là quyền thiêng liêng để tôi phát triển toàn diện cả về Thể chất, Trí tuệ và Tâm hồn .\n\nTôi đang sở hữu một mô hình kinh doanh hoàn toàn tự do, vận hành thông minh và không bị ràng buộc bởi thời gian hay không gian . Chỉ với chiếc máy tính và kết nối internet, tôi có thể điều hành doanh nghiệp của mình ở bất cứ nơi nào trên thế giới. Công việc này mang lại cho tôi những trải nghiệm du lịch tuyệt vời và những cộng sự xuất sắc, cùng nhau kiến tạo sự thịnh vượng trên bình diện sáng tạo đỉnh cao .\n\nTôi có khả năng học hỏi và giao tiếp trôi chảy bằng nhiều ngôn ngữ . Mỗi một người tôi gặp, tôi đều truyền cho họ 'Ấn tượng về sự gia tăng', trao cho họ giá trị sử dụng lớn hơn nhiều so với giá trị tiền mặt tôi nhận về .\n\nỞ tuổi 33, tôi tự hào khi đã chinh phục thành công cột mốc 1 triệu đô-la đầu tiên và dòng tài sản của tôi đang không ngừng tăng vọt tiến gần đến mục tiêu 2 triệu đô-la dồi dào . Tiền bạc là phương tiện trung gian tuyệt vời giúp tôi khuếch đại những giá trị tốt đẹp . Tôi hạnh phúc ngắm nhìn nụ cười rạng rỡ của gia đình và những người tôi yêu thương khi đưa họ đi du lịch khắp thế giới một cách xa hoa, tiện nghi và trọn vẹn nhất . Tôi dũng cảm khóa chặt tâm trí mình vào Chân lý duy nhất của sự dư dả và gạt bỏ hoàn toàn mọi tư tưởng hoài nghi .";
+
+        // 2. STATE INITS
+        let appState = {
+            goalText: defaultGoalText,
+            mentalMovie: defaultMentalMovie,
+            streakCount: 0,
+            lastCompletedDate: null,
+            ritualsCompletedToday: {
+                m1: false, m2: false, m3: false,
+                n1: false, n2: false, n3: false
+            }
+        };
+
+        // DOM elements
+        const goalCardInner = document.getElementById('goal-card-inner');
+        const goalTextInput = document.getElementById('goal-text-input');
+        const mentalMovieInput = document.getElementById('mental-movie-input');
+        const streakCountBadge = document.getElementById('streak-count-badge');
+        const btnCompleteDay = document.getElementById('btn-complete-day');
+
+        // Firebase Setup configuration
+        const hasFirebase = typeof __firebase_config !== 'undefined' && __firebase_config;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sogr-visualizer';
+        
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let cloudSaveTimeout = null;
+
+        // Initialize Firebase services gracefully if credentials exist
+        if (hasFirebase) {
+            try {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                setSyncStatus('connecting');
+            } catch (err) {
+                console.error("Lỗi cấu hình Firebase:", err);
+                setSyncStatus('error');
+            }
+        } else {
+            setSyncStatus('offline');
+        }
+
+        // Initializer
+        window.addEventListener('DOMContentLoaded', () => {
+            loadStateFromStorage();
+            setupAutoSave();
+            checkAndResetStreakIfMissed();
+            
+            // Allow card flip interaction inside the target zone but exclude clicking on textarea itself
+            goalCardInner.addEventListener('click', (e) => {
+                if(e.target !== goalTextInput) {
+                    flipCard();
+                }
+            });
+
+            // Start authentication flow
+            if (auth) {
+                initAuthFlow();
+            }
+        });
+
+        // AUTHENTICATION FLOW (RULE 3 Priority)
+        async function initAuthFlow() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Auth flow failed, continuing offline.", err);
+                setSyncStatus('offline');
+            }
+
+            // Track Auth state changed
+            onAuthStateChanged(auth, async (user) => {
+                currentUser = user;
+                if (user) {
+                    document.getElementById('user-id-display').textContent = user.uid;
+                    setSyncStatus('saving');
+                    await pullCloudState();
+                } else {
+                    document.getElementById('user-id-display').textContent = "Không định danh";
+                    setSyncStatus('offline');
+                }
+            });
+        }
+
+        // PULL STATE FROM CLOUD (RULE 1 Strict Path checks)
+        async function pullCloudState() {
+            if (!currentUser || !db) return;
+            try {
+                // Strict path logic following: /artifacts/{appId}/users/{userId}/{collectionName}/{documentId}
+                const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'state', 'main');
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const cloudData = docSnap.data();
+                    
+                    // Merging logic: prefer loaded cloud data if available
+                    appState.goalText = cloudData.goalText || appState.goalText;
+                    appState.mentalMovie = cloudData.mentalMovie || appState.mentalMovie;
+                    appState.streakCount = cloudData.streakCount ?? appState.streakCount;
+                    appState.lastCompletedDate = cloudData.lastCompletedDate || appState.lastCompletedDate;
+                    
+                    if (cloudData.ritualsCompletedToday) {
+                        appState.ritualsCompletedToday = cloudData.ritualsCompletedToday;
+                    }
+
+                    // Render updated variables to UI
+                    goalTextInput.value = appState.goalText;
+                    mentalMovieInput.value = appState.mentalMovie;
+                    streakCountBadge.textContent = appState.streakCount;
+                    
+                    syncRitualCheckboxes();
+                    checkRitualCompletion();
+                    setSyncStatus('synced');
+                } else {
+                    // Initialize cloud with current local values
+                    await pushStateToCloud();
+                }
+            } catch (err) {
+                console.error("Failed to pull state from Cloud Firestore:", err);
+                setSyncStatus('error');
+            }
+        }
+
+        // PUSH STATE TO CLOUD (RULE 1 Strict Paths)
+        async function pushStateToCloud() {
+            if (!currentUser || !db) return;
+            try {
+                // Path strictly maps to: /artifacts/{appId}/users/{userId}/state/main
+                const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'state', 'main');
+                await setDoc(docRef, {
+                    goalText: appState.goalText,
+                    mentalMovie: appState.mentalMovie,
+                    streakCount: appState.streakCount,
+                    lastCompletedDate: appState.lastCompletedDate,
+                    ritualsCompletedToday: appState.ritualsCompletedToday,
+                    synchronizedAt: new Date().toISOString()
+                }, { merge: true });
+                setSyncStatus('synced');
+            } catch (err) {
+                console.error("Cloud synchronization failed:", err);
+                setSyncStatus('error');
+            }
+        }
+
+        // DEBOUNCED QUEUE SYNC TO CLOUD
+        function queueCloudSync() {
+            if (!currentUser || !db) return;
+            setSyncStatus('saving');
+            if (cloudSaveTimeout) clearTimeout(cloudSaveTimeout);
+            cloudSaveTimeout = setTimeout(() => {
+                pushStateToCloud();
+            }, 1500); // Wait 1.5 seconds after user stops typing to commit cloud write
+        }
+
+        // Sync local storage load visually
+        function syncRitualCheckboxes() {
+            const todayStr = getTodayString();
+            if (appState.lastCompletedDate === todayStr) {
+                document.getElementById('m-ritual-1').checked = true;
+                document.getElementById('m-ritual-2').checked = true;
+                document.getElementById('m-ritual-3').checked = true;
+                document.getElementById('n-ritual-1').checked = true;
+                document.getElementById('n-ritual-2').checked = true;
+                document.getElementById('n-ritual-3').checked = true;
+                btnCompleteDay.textContent = "Hôm Nay Đã Hoàn Thành Kỷ Luật!";
+                btnCompleteDay.className = "w-full py-3 bg-gold-dark/40 border border-gold text-gold rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-not-allowed";
+                btnCompleteDay.disabled = true;
+            } else {
+                document.getElementById('m-ritual-1').checked = appState.ritualsCompletedToday.m1 || false;
+                document.getElementById('m-ritual-2').checked = appState.ritualsCompletedToday.m2 || false;
+                document.getElementById('m-ritual-3').checked = appState.ritualsCompletedToday.m3 || false;
+                document.getElementById('n-ritual-1').checked = appState.ritualsCompletedToday.n1 || false;
+                document.getElementById('n-ritual-2').checked = appState.ritualsCompletedToday.n2 || false;
+                document.getElementById('n-ritual-3').checked = appState.ritualsCompletedToday.n3 || false;
+            }
+        }
+
+        // 3. STORAGE LOGIC
+        function loadStateFromStorage() {
+            try {
+                const stored = localStorage.getItem('sogr_visualizer_state_v1');
+                if (stored) {
+                    appState = JSON.parse(stored);
+                }
+            } catch (error) {
+                console.error("Lỗi khi tải dữ liệu từ LocalStorage", error);
+            }
+
+            // Sync visual UI elements
+            goalTextInput.value = appState.goalText || defaultGoalText;
+            mentalMovieInput.value = appState.mentalMovie || defaultMentalMovie;
+            streakCountBadge.textContent = appState.streakCount || 0;
+            
+            syncRitualCheckboxes();
+        }
+
+        function saveStateToStorage() {
+            appState.goalText = goalTextInput.value;
+            appState.mentalMovie = mentalMovieInput.value;
+            
+            appState.ritualsCompletedToday = {
+                m1: document.getElementById('m-ritual-1').checked,
+                m2: document.getElementById('m-ritual-2').checked,
+                m3: document.getElementById('m-ritual-3').checked,
+                n1: document.getElementById('n-ritual-1').checked,
+                n2: document.getElementById('n-ritual-2').checked,
+                n3: document.getElementById('n-ritual-3').checked,
+            };
+
+            localStorage.setItem('sogr_visualizer_state_v1', JSON.stringify(appState));
+            queueCloudSync(); // Trigger Cloud Queue sync automatically
+        }
+
+        function setupAutoSave() {
+            goalTextInput.addEventListener('input', saveStateToStorage);
+            mentalMovieInput.addEventListener('input', saveStateToStorage);
+            goalTextInput.addEventListener('blur', saveStateToStorage);
+            mentalMovieInput.addEventListener('blur', saveStateToStorage);
+        }
+
+        // Helper: Format Date
+        function getTodayString() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Dynamic status badge colorizer
+        function setSyncStatus(status) {
+            const badge = document.getElementById('sync-status-badge');
+            const text = document.getElementById('sync-status-text');
+            if (status === 'synced') {
+                badge.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-500/30 text-xs text-emerald-400 bg-emerald-950/20";
+                text.textContent = "Đã đồng bộ";
+            } else if (status === 'saving') {
+                badge.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-blue-500/30 text-xs text-blue-400 bg-blue-950/20 animate-pulse";
+                text.textContent = "Đang lưu...";
+            } else if (status === 'connecting') {
+                badge.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-amber-500/30 text-xs text-amber-400 bg-amber-950/20 animate-pulse";
+                text.textContent = "Đang kết nối...";
+            } else if (status === 'error') {
+                badge.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-rose-500/30 text-xs text-rose-400 bg-rose-950/20";
+                text.textContent = "Lỗi đồng bộ";
+            } else {
+                badge.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-800 text-xs text-slate-400 bg-luxury-card/50";
+                text.textContent = "Ngoại tuyến";
+            }
+        }
+
+        // 4. CARD FLIP INTERACTION
+        function flipCard() {
+            goalCardInner.classList.toggle('rotate-y-180');
+        }
+
+        // 5. BINAURAL BEATS (WEB AUDIO API)
+        let audioCtx = null;
+        let oscLeft = null;
+        let oscRight = null;
+        let pannerLeft = null;
+        let pannerRight = null;
+        let mainGainNode = null;
+        let isAudioPlaying = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playBinaural(type) {
+            initAudio();
+            stopBinaural(); // Stop any currently playing audio nodes
+
+            isAudioPlaying = true;
+            
+            // Set up frequencies
+            let freqLeft = 400; // Base carrier frequency
+            let freqRight = 410; // 10Hz offset for Alpha
+            
+            if (type === 'theta') {
+                freqRight = 406; // 6Hz offset for Theta
+            }
+
+            // Create oscillators & nodes
+            oscLeft = audioCtx.createOscillator();
+            oscRight = audioCtx.createOscillator();
+            pannerLeft = audioCtx.createStereoPanner();
+            pannerRight = audioCtx.createStereoPanner();
+            mainGainNode = audioCtx.createGain();
+
+            // Set configuration
+            oscLeft.type = 'sine';
+            oscLeft.frequency.setValueAtTime(freqLeft, audioCtx.currentTime);
+            
+            oscRight.type = 'sine';
+            oscRight.frequency.setValueAtTime(freqRight, audioCtx.currentTime);
+
+            pannerLeft.pan.setValueAtTime(-1, audioCtx.currentTime); // hard left
+            pannerRight.pan.setValueAtTime(1, audioCtx.currentTime); // hard right
+
+            // Initial volume setting
+            const currentVol = parseFloat(document.getElementById('sound-volume').value);
+            mainGainNode.gain.setValueAtTime(currentVol, audioCtx.currentTime);
+
+            // Routing
+            oscLeft.connect(pannerLeft);
+            pannerLeft.connect(mainGainNode);
+
+            oscRight.connect(pannerRight);
+            pannerRight.connect(mainGainNode);
+
+            mainGainNode.connect(audioCtx.destination);
+
+            // Start synthesis
+            oscLeft.start();
+            oscRight.start();
+
+            // Highlight Active UI Button
+            resetAudioButtons();
+            if (type === 'alpha') {
+                document.getElementById('btn-alpha').classList.add('border-gold', 'text-gold', 'bg-gold/10');
+            } else if (type === 'theta') {
+                document.getElementById('btn-theta').classList.add('border-gold', 'text-gold', 'bg-gold/10');
+            }
+        }
+
+        function stopBinaural() {
+            if (oscLeft) {
+                try { oscLeft.stop(); } catch(e){}
+                oscLeft.disconnect();
+                oscLeft = null;
+            }
+            if (oscRight) {
+                try { oscRight.stop(); } catch(e){}
+                oscRight.disconnect();
+                oscRight = null;
+            }
+            isAudioPlaying = false;
+            resetAudioButtons();
+        }
+
+        function updateVolume(val) {
+            document.getElementById('volume-indicator').textContent = `${Math.round(val * 100)}%`;
+            if (mainGainNode && audioCtx) {
+                mainGainNode.gain.setValueAtTime(val, audioCtx.currentTime);
+            }
+        }
+
+        function resetAudioButtons() {
+            document.getElementById('btn-alpha').className = "py-3 px-4 rounded-xl border border-slate-700/60 hover:border-gold/50 bg-luxury-navy/40 hover:bg-gold/5 text-slate-300 hover:text-gold text-sm font-medium transition-all flex justify-between items-center";
+            document.getElementById('btn-theta').className = "py-3 px-4 rounded-xl border border-slate-700/60 hover:border-gold/50 bg-luxury-navy/40 hover:bg-gold/5 text-slate-300 hover:text-gold text-sm font-medium transition-all flex justify-between items-center";
+        }
+
+        // 6. CINEMA MODE (AUTOSCROLL SCREEN)
+        let scrollSpeedMultiplier = 1.0;
+        let currentScrollY = 0;
+        let isScrolling = false;
+
+        function startCinemaMode() {
+            const cinemaContainer = document.getElementById('cinema-container');
+            const scrollingContent = document.getElementById('cinema-scrolling-content');
+            
+            scrollingContent.textContent = mentalMovieInput.value || defaultMentalMovie;
+            
+            cinemaContainer.classList.remove('hidden');
+            
+            // Try to enter native browser Fullscreen, wrapped inside safety check to catch Permissions Policy rejections gracefully
+            try {
+                if (cinemaContainer.requestFullscreen) {
+                    cinemaContainer.requestFullscreen().catch(err => {
+                        console.warn("Native fullscreen blocked by permissions policy. Using fullscreen viewport fallback.", err);
+                    });
+                } else if (cinemaContainer.webkitRequestFullscreen) { /* Safari */
+                    cinemaContainer.webkitRequestFullscreen();
+                } else if (cinemaContainer.msRequestFullscreen) { /* IE11 */
+                    cinemaContainer.msRequestFullscreen();
+                }
+            } catch (err) {
+                console.warn("Fullscreen request failed or was blocked by sandbox permissions policy. Defaulting to Overlay mode.", err);
+            }
+
+            // Begin Autoscroll setup
+            setTimeout(() => {
+                startScroller();
+            }, 1000);
+        }
+
+        function setScrollSpeed(speed) {
+            scrollSpeedMultiplier = speed;
+            // Update active state visualizer on Cinema Panel
+            document.querySelectorAll("[id^='speed-']").forEach(btn => {
+                btn.className = "px-2 py-0.5 text-xs rounded border border-zinc-700 hover:border-gold hover:text-gold transition-all";
+            });
+            document.getElementById(`speed-${speed}`).className = "px-2 py-0.5 text-xs rounded border border-gold text-gold transition-all";
+        }
+
+        function startScroller() {
+            const viewport = document.getElementById('cinema-scroll-viewport');
+            const textWrapper = document.getElementById('cinema-text-wrapper');
+            
+            // Set starting point (from bottom of the screen)
+            currentScrollY = viewport.clientHeight;
+            textWrapper.style.top = `${currentScrollY}px`;
+            
+            isScrolling = true;
+
+            function scrollLoop() {
+                if (!isScrolling) return;
+
+                // Adjust pixel distance incrementally per frame
+                currentScrollY -= (0.55 * scrollSpeedMultiplier);
+                textWrapper.style.top = `${currentScrollY}px`;
+
+                // If text scrolls off-screen on the top, reset positions
+                if (currentScrollY + textWrapper.clientHeight < -50) {
+                    currentScrollY = viewport.clientHeight;
+                }
+
+                requestAnimationFrame(scrollLoop);
+            }
+
+            requestAnimationFrame(scrollLoop);
+        }
+
+        function exitCinemaMode() {
+            isScrolling = false;
+            document.getElementById('cinema-container').classList.add('hidden');
+            
+            try {
+                if (document.fullscreenElement || document.webkitFullscreenElement) {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    }
+                }
+            } catch (err) {
+                console.warn("Could not exit native fullscreen mode safely:", err);
+            }
+        }
+
+        // Listen for Esc key standard fullscreen exits to sync UI states
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                isScrolling = false;
+                document.getElementById('cinema-container').classList.add('hidden');
+            }
+        });
+
+        // 7. PRACTICE TRACKER & STREAK SYSTEM
+        function checkRitualCompletion() {
+            const m1 = document.getElementById('m-ritual-1').checked;
+            const m2 = document.getElementById('m-ritual-2').checked;
+            const m3 = document.getElementById('m-ritual-3').checked;
+            const n1 = document.getElementById('n-ritual-1').checked;
+            const n2 = document.getElementById('n-ritual-2').checked;
+            const n3 = document.getElementById('n-ritual-3').checked;
+
+            const allChecked = m1 && m2 && m3 && n1 && n2 && n3;
+            
+            const todayStr = getTodayString();
+            const alreadyCompletedToday = (appState.lastCompletedDate === todayStr);
+
+            if (alreadyCompletedToday) {
+                btnCompleteDay.disabled = true;
+                return;
+            }
+
+            if (allChecked) {
+                btnCompleteDay.disabled = false;
+                btnCompleteDay.className = "w-full py-3 bg-gradient-to-r from-gold-dark to-gold hover:brightness-110 text-luxury-black font-semibold rounded-xl text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg";
+            } else {
+                btnCompleteDay.disabled = true;
+                btnCompleteDay.className = "w-full py-3 bg-slate-800 text-slate-500 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-not-allowed";
+            }
+        }
+
+        function completeDay() {
+            const todayStr = getTodayString();
+            
+            // Check if streak is kept alive or newly initiated
+            if (appState.lastCompletedDate) {
+                const lastDate = new Date(appState.lastCompletedDate);
+                const todayDate = new Date(todayStr);
+                const diffTime = Math.abs(todayDate - lastDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays === 1) {
+                    appState.streakCount += 1;
+                } else if (diffDays > 1) {
+                    appState.streakCount = 1; // reset streak and start fresh if missed
+                }
+            } else {
+                appState.streakCount = 1; // first log ever
+            }
+
+            appState.lastCompletedDate = todayStr;
+            saveStateToStorage();
+
+            // Refresh Visuals
+            streakCountBadge.textContent = appState.streakCount;
+            btnCompleteDay.textContent = "Hôm Nay Đã Hoàn Thành Kỷ Luật!";
+            btnCompleteDay.className = "w-full py-3 bg-gold-dark/40 border border-gold text-gold rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-not-allowed";
+            btnCompleteDay.disabled = true;
+
+            // Trigger push online and reward alert
+            pushStateToCloud();
+            showNotification("Đã Khắc Ghi Thành Công!", "Tiêu chuẩn tư duy thịnh vượng hôm nay đã chính thức được hấp thụ lên đám mây.", "fa-trophy");
+        }
+
+        function checkAndResetStreakIfMissed() {
+            if (!appState.lastCompletedDate) return;
+
+            const todayStr = getTodayString();
+            const lastDate = new Date(appState.lastCompletedDate);
+            const todayDate = new Date(todayStr);
+            const diffTime = Math.abs(todayDate - lastDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays > 1) {
+                appState.streakCount = 0; // Missed a day! Reset streak count.
+                saveStateToStorage();
+                streakCountBadge.textContent = 0;
+            }
+        }
+
+        // Generic Premium Notification Alert System (Browser Dialog Replacement)
+        function showNotification(title, desc, icon = "fa-circle-check") {
+            const notify = document.createElement('div');
+            notify.className = "fixed bottom-6 right-6 z-50 bg-luxury-card border-2 border-gold text-slate-100 p-5 rounded-2xl flex items-center gap-4 gold-glow transition-all duration-500 transform translate-y-12 opacity-0";
+            notify.innerHTML = `
+                <div class="p-2.5 bg-gold/15 rounded-full text-gold">
+                    <i class="fa-solid ${icon} text-lg"></i>
+                </div>
+                <div>
+                    <h4 class="font-serif font-bold text-gold-light text-sm">${title}</h4>
+                    <p class="text-xs text-slate-400 mt-0.5">${desc}</p>
+                </div>
+            `;
+            document.body.appendChild(notify);
+            
+            setTimeout(() => { notify.classList.remove('translate-y-12', 'opacity-0'); }, 100);
+            setTimeout(() => {
+                notify.classList.add('translate-y-12', 'opacity-0');
+                setTimeout(() => { notify.remove(); }, 550);
+            }, 4500);
+        }
+
+        // Clipboard Copy Utility safely respecting CSP permissions
+        function copyUserId() {
+            if (!currentUser) return;
+            const tempInput = document.createElement('input');
+            tempInput.value = currentUser.uid;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showNotification("Đã Sao Chép ID!", "Hãy giữ lại mã định danh này để đồng bộ tiến độ trên các trình duyệt khác.");
+        }
+
+        // 8. PRINT MODE HANDLERS
+        function triggerPrint() {
+            document.getElementById('print-goal-text').textContent = goalTextInput.value;
+            window.print();
+        }
+
+        // Mount module functions to global window object so inline event handlers work flawlessly
+        window.flipCard = flipCard;
+        window.playBinaural = playBinaural;
+        window.stopBinaural = stopBinaural;
+        window.updateVolume = updateVolume;
+        window.startCinemaMode = startCinemaMode;
+        window.exitCinemaMode = exitCinemaMode;
+        window.setScrollSpeed = setScrollSpeed;
+        window.checkRitualCompletion = checkRitualCompletion;
+        window.completeDay = completeDay;
+        window.triggerPrint = triggerPrint;
+        window.copyUserId = copyUserId;
+    </script>
+</body>
+</html>
