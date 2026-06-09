@@ -153,10 +153,10 @@
                     <p class="text-xs text-slate-400 tracking-widest uppercase mt-1">SOGR Visualizer • Science of Getting Rich</p>
                 </div>
                 <!-- Dynamic Cloud Sync Status Badge -->
-                <div id="sync-status-badge" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-800 text-xs text-slate-400 bg-luxury-card/50 transition-all">
+                <button onclick="openCloudModal()" id="sync-status-badge" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-800 text-xs text-slate-400 bg-luxury-card/50 transition-all hover:border-gold/40">
                     <i class="fa-solid fa-cloud"></i>
-                    <span id="sync-status-text">Ngoại tuyến</span>
-                </div>
+                    <span id="sync-status-text">Thiết lập đám mây</span>
+                </button>
             </div>
             
             <!-- Quick Actions Header -->
@@ -373,21 +373,16 @@
                     </div>
                 </div>
 
-                <!-- Complete Button & Streak Log -->
+                <!-- Complete Button -->
                 <div class="flex flex-col gap-3">
                     <button id="btn-complete-day" disabled onclick="completeDay()" class="w-full py-3 bg-slate-800 text-slate-500 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-not-allowed">
                         <i class="fa-solid fa-check-double"></i> Xác Nhận Hoàn Thành Ngày
                     </button>
                     
-                    <!-- Copy User ID Segment for cross-device authentication -->
-                    <div class="flex items-center justify-between text-[11px] text-slate-500 font-mono border-t border-slate-800/80 pt-3">
-                        <span>Đồng bộ hóa đám mây</span>
-                        <div class="flex items-center gap-1.5 cursor-pointer hover:text-gold transition-colors" onclick="copyUserId()">
-                            <span>ID:</span>
-                            <span id="user-id-display">Chờ kết nối...</span>
-                            <i class="fa-regular fa-copy"></i>
-                        </div>
-                    </div>
+                    <!-- Cloud Sync Panel Link -->
+                    <button onclick="openCloudModal()" class="w-full py-2 border border-slate-800/80 hover:border-gold/40 text-slate-400 hover:text-gold rounded-xl text-xs transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-gears"></i> Quản lý Đồng bộ Đám mây
+                    </button>
                 </div>
                 <p id="streak-warning" class="text-[11px] text-slate-500 text-center mt-3 italic">Hãy hoàn thành tất cả 6 nghi thức trên để xác nhận kỷ luật ngày hôm nay.</p>
             </div>
@@ -396,7 +391,75 @@
 
     </main>
 
-    <!-- CINEMA SCREEN (FULLSCREEN MODAL) -->
+    <!-- PREMIUM CLOUD SETTINGS MODAL (GLASSMORPHISM) -->
+    <div id="cloud-settings-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+        <div class="bg-luxury-card border border-slate-800/80 w-full max-w-lg rounded-2xl p-6 gold-glow relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeCloudModal()" class="absolute top-4 right-4 text-slate-500 hover:text-slate-200 transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            
+            <h3 class="text-xl font-serif text-gold-light mb-2 flex items-center gap-2.5">
+                <i class="fa-solid fa-cloud-arrow-up text-gold"></i> Thiết lập Đồng bộ Đám mây
+            </h3>
+            <p class="text-xs text-slate-400 mb-6 leading-relaxed">Đồng bộ kịch bản tâm lý, thẻ mục tiêu 3D và tiến trình kỷ luật của bạn trên mọi thiết bị.</p>
+            
+            <!-- SECTION A: SYNC ID INTERACTION -->
+            <div class="bg-luxury-navy/40 rounded-xl p-4 border border-slate-800 mb-6">
+                <h4 class="text-xs uppercase tracking-widest text-gold font-bold mb-3 flex items-center justify-between">
+                    <span>1. Mã ID Đồng bộ Cá nhân</span>
+                    <i class="fa-solid fa-id-badge text-gold/60"></i>
+                </h4>
+                <p class="text-[11px] text-slate-400 mb-3">Copy ID này từ máy tính sang điện thoại để kế thừa tiến trình luyện tập của bạn.</p>
+                
+                <!-- Display & Input Field combined for premium flexibility -->
+                <div class="flex gap-2">
+                    <input type="text" id="custom-sync-id-input" 
+                        class="flex-1 bg-luxury-black border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-300 focus:outline-none focus:border-gold/50" 
+                        placeholder="Nhập hoặc dán mã ID đồng bộ của bạn...">
+                    <button onclick="applyCustomSyncId()" class="px-3.5 py-2 bg-gold text-luxury-black text-xs font-semibold rounded-lg hover:brightness-110 transition-all">
+                        Kết nối ID
+                    </button>
+                </div>
+                
+                <div class="mt-3 flex justify-between items-center text-[10px] text-slate-500 font-mono">
+                    <span>ID hiện tại: <strong id="current-id-string" class="text-gold-light">Đang khởi tạo...</strong></span>
+                    <button onclick="copyCurrentUserId()" class="text-slate-400 hover:text-gold transition-colors flex items-center gap-1">
+                        <i class="fa-regular fa-copy"></i> Sao chép ID
+                    </button>
+                </div>
+            </div>
+
+            <!-- SECTION B: CUSTOM FIREBASE CONFIG FOR GITHUB PAGES -->
+            <div class="bg-luxury-navy/40 rounded-xl p-4 border border-slate-800">
+                <h4 class="text-xs uppercase tracking-widest text-gold font-bold mb-2 flex items-center justify-between">
+                    <span>2. Máy chủ Đám mây (Firebase)</span>
+                    <i class="fa-solid fa-server text-gold/60"></i>
+                </h4>
+                <p class="text-[11px] text-slate-400 mb-3 leading-relaxed">Để tự chạy máy chủ lưu trữ dữ liệu cá nhân trên **GitHub Pages**, bạn chỉ cần dán cấu hình Firebase của bạn vào đây. Hệ thống sẽ kết nối tự động.</p>
+                
+                <textarea id="custom-firebase-config-input" 
+                    class="w-full h-32 bg-luxury-black border border-slate-800 rounded-lg p-2.5 text-[10px] font-mono text-slate-400 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/10 resize-none mb-3"
+                    placeholder='Dán đoạn mã config dạng JSON hoặc SDK vào đây:&#10;{&#10;  "apiKey": "...",&#10;  "authDomain": "...",&#10;  "projectId": "..."&#10;}'></textarea>
+                
+                <div class="flex gap-2">
+                    <button onclick="saveCustomFirebaseConfig()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition-all">
+                        Cập nhật máy chủ
+                    </button>
+                    <button onclick="clearCustomFirebaseConfig()" class="py-2 px-3 border border-slate-800 hover:border-rose-800/40 text-slate-500 hover:text-rose-400 text-xs rounded-lg transition-all">
+                        Reset mặc định
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button onclick="closeCloudModal()" class="px-5 py-2 bg-gold/15 hover:bg-gold/25 border border-gold/30 text-gold text-xs font-semibold rounded-lg transition-all">
+                    Hoàn tất thiết lập
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CINEMA SCREEN (FIXED SCROLL LAYOUT BUG RESOLVED) -->
     <div id="cinema-container" class="hidden fixed inset-0 z-50 bg-black flex-col justify-between p-6">
         <!-- Floating Controls Panel -->
         <div class="w-full flex items-center justify-between bg-zinc-950/80 backdrop-blur-md px-6 py-4 rounded-2xl border border-zinc-800 text-slate-100 max-w-4xl mx-auto mt-4 transition-all duration-300 hover:opacity-100 opacity-60">
@@ -417,10 +480,10 @@
             </button>
         </div>
 
-        <!-- Scroll viewport -->
-        <div id="cinema-scroll-viewport" class="flex-1 overflow-y-hidden relative flex items-center justify-center py-20 px-4">
-            <div id="cinema-text-wrapper" class="absolute top-[80%] max-w-3xl text-center">
-                <p id="cinema-scrolling-content" class="text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-relaxed text-amber-100/90 font-serif whitespace-pre-wrap selection:bg-gold/30 selection:text-gold-light leading-loose text-center px-4">
+        <!-- Scroll viewport with fixed full-width centering geometry -->
+        <div id="cinema-scroll-viewport" class="flex-1 overflow-y-hidden relative py-20">
+            <div id="cinema-text-wrapper" class="absolute w-full max-w-4xl px-6 left-1/2 -translate-x-1/2 text-center">
+                <p id="cinema-scrolling-content" class="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-amber-100/90 font-serif whitespace-pre-wrap selection:bg-gold/30 selection:text-gold-light leading-loose text-center">
                     <!-- Loaded dynamically -->
                 </p>
             </div>
@@ -480,7 +543,8 @@
             ritualsCompletedToday: {
                 m1: false, m2: false, m3: false,
                 n1: false, n2: false, n3: false
-            }
+            },
+            customSyncId: null
         };
 
         // DOM elements
@@ -491,18 +555,27 @@
         const btnCompleteDay = document.getElementById('btn-complete-day');
 
         // Firebase Setup configuration
-        const hasFirebase = typeof __firebase_config !== 'undefined' && __firebase_config;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sogr-visualizer';
+        const defaultAppId = typeof __app_id !== 'undefined' ? __app_id : 'sogr-visualizer';
         
         let db = null;
         let auth = null;
         let currentUser = null;
         let cloudSaveTimeout = null;
 
-        // Initialize Firebase services gracefully if credentials exist
-        if (hasFirebase) {
+        // Try getting system config or custom pasted user config from localstorage
+        const storedCustomConfig = localStorage.getItem('sogr_custom_firebase_config_v1');
+        const envConfig = typeof __firebase_config !== 'undefined' && __firebase_config ? __firebase_config : null;
+        const finalConfigString = storedCustomConfig || envConfig;
+
+        // Populate Custom configuration box if loaded on settings modal init
+        if (storedCustomConfig) {
+            document.getElementById('custom-firebase-config-input').value = storedCustomConfig;
+        }
+
+        // Initialize Firebase services gracefully if configuration exists
+        if (finalConfigString) {
             try {
-                const firebaseConfig = JSON.parse(__firebase_config);
+                const firebaseConfig = JSON.parse(finalConfigString);
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
@@ -531,6 +604,8 @@
             // Start authentication flow
             if (auth) {
                 initAuthFlow();
+            } else {
+                updateSyncIdDisplay();
             }
         });
 
@@ -550,23 +625,41 @@
             // Track Auth state changed
             onAuthStateChanged(auth, async (user) => {
                 currentUser = user;
+                updateSyncIdDisplay();
                 if (user) {
-                    document.getElementById('user-id-display').textContent = user.uid;
                     setSyncStatus('saving');
                     await pullCloudState();
                 } else {
-                    document.getElementById('user-id-display').textContent = "Không định danh";
                     setSyncStatus('offline');
                 }
             });
         }
 
+        // Render Current active Sync ID to settings Modal
+        function updateSyncIdDisplay() {
+            const activeId = getActiveSyncId();
+            document.getElementById('current-id-string').textContent = activeId;
+            document.getElementById('custom-sync-id-input').value = appState.customSyncId || "";
+        }
+
+        // Resolve priority of Active Sync ID
+        function getActiveSyncId() {
+            if (appState.customSyncId) {
+                return appState.customSyncId;
+            }
+            if (currentUser) {
+                return currentUser.uid;
+            }
+            return "Chưa kết nối đám mây";
+        }
+
         // PULL STATE FROM CLOUD (RULE 1 Strict Path checks)
         async function pullCloudState() {
-            if (!currentUser || !db) return;
+            const syncId = getActiveSyncId();
+            if (!currentUser || !db || syncId === "Chưa kết nối đám mây") return;
             try {
-                // Strict path logic following: /artifacts/{appId}/users/{userId}/{collectionName}/{documentId}
-                const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'state', 'main');
+                // Strict path logic following: /artifacts/{appId}/users/{userId}/state/main
+                const docRef = doc(db, 'artifacts', defaultAppId, 'users', syncId, 'state', 'main');
                 const docSnap = await getDoc(docRef);
                 
                 if (docSnap.exists()) {
@@ -590,6 +683,7 @@
                     syncRitualCheckboxes();
                     checkRitualCompletion();
                     setSyncStatus('synced');
+                    localStorage.setItem('sogr_visualizer_state_v1', JSON.stringify(appState));
                 } else {
                     // Initialize cloud with current local values
                     await pushStateToCloud();
@@ -602,10 +696,11 @@
 
         // PUSH STATE TO CLOUD (RULE 1 Strict Paths)
         async function pushStateToCloud() {
-            if (!currentUser || !db) return;
+            const syncId = getActiveSyncId();
+            if (!currentUser || !db || syncId === "Chưa kết nối đám mây") return;
             try {
                 // Path strictly maps to: /artifacts/{appId}/users/{userId}/state/main
-                const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'state', 'main');
+                const docRef = doc(db, 'artifacts', defaultAppId, 'users', syncId, 'state', 'main');
                 await setDoc(docRef, {
                     goalText: appState.goalText,
                     mentalMovie: appState.mentalMovie,
@@ -631,6 +726,47 @@
             }, 1500); // Wait 1.5 seconds after user stops typing to commit cloud write
         }
 
+        // Apply custom manually entered user ID for synchronization (Pull or Swap)
+        async function applyCustomSyncId() {
+            const rawId = document.getElementById('custom-sync-id-input').value.trim();
+            if (!rawId) {
+                appState.customSyncId = null;
+                showNotification("Sử dụng ID mặc định", "Đã quay về sử dụng tài khoản định danh ngẫu nhiên gốc.");
+            } else {
+                appState.customSyncId = rawId;
+                showNotification("Đã liên kết ID!", "Hệ thống đang tải dữ liệu đồng bộ của ID mới...");
+            }
+            saveStateToStorage();
+            updateSyncIdDisplay();
+            
+            if (db && currentUser) {
+                setSyncStatus('connecting');
+                await pullCloudState();
+            }
+        }
+
+        // Dynamic status badge colorizer
+        function setSyncStatus(status) {
+            const badge = document.getElementById('sync-status-badge');
+            const text = document.getElementById('sync-status-text');
+            if (status === 'synced') {
+                badge.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-500/30 text-xs text-emerald-400 bg-emerald-950/20";
+                text.textContent = "Đã đồng bộ";
+            } else if (status === 'saving') {
+                badge.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-blue-500/30 text-xs text-blue-400 bg-blue-950/20 animate-pulse";
+                text.textContent = "Đang lưu...";
+            } else if (status === 'connecting') {
+                badge.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-amber-500/30 text-xs text-amber-400 bg-amber-950/20 animate-pulse";
+                text.textContent = "Đang kết nối...";
+            } else if (status === 'error') {
+                badge.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-rose-500/30 text-xs text-rose-400 bg-rose-950/20";
+                text.textContent = "Lỗi đồng bộ";
+            } else {
+                badge.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-800 text-xs text-slate-400 bg-luxury-card/50";
+                text.textContent = "Ngoại tuyến";
+            }
+        }
+
         // Sync local storage load visually
         function syncRitualCheckboxes() {
             const todayStr = getTodayString();
@@ -645,12 +781,12 @@
                 btnCompleteDay.className = "w-full py-3 bg-gold-dark/40 border border-gold text-gold rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-not-allowed";
                 btnCompleteDay.disabled = true;
             } else {
-                document.getElementById('m-ritual-1').checked = appState.ritualsCompletedToday.m1 || false;
-                document.getElementById('m-ritual-2').checked = appState.ritualsCompletedToday.m2 || false;
-                document.getElementById('m-ritual-3').checked = appState.ritualsCompletedToday.m3 || false;
-                document.getElementById('n-ritual-1').checked = appState.ritualsCompletedToday.n1 || false;
-                document.getElementById('n-ritual-2').checked = appState.ritualsCompletedToday.n2 || false;
-                document.getElementById('n-ritual-3').checked = appState.ritualsCompletedToday.n3 || false;
+                document.getElementById('m-ritual-1').checked = appState.ritualsCompletedToday?.m1 || false;
+                document.getElementById('m-ritual-2').checked = appState.ritualsCompletedToday?.m2 || false;
+                document.getElementById('m-ritual-3').checked = appState.ritualsCompletedToday?.m3 || false;
+                document.getElementById('n-ritual-1').checked = appState.ritualsCompletedToday?.n1 || false;
+                document.getElementById('n-ritual-2').checked = appState.ritualsCompletedToday?.n2 || false;
+                document.getElementById('n-ritual-3').checked = appState.ritualsCompletedToday?.n3 || false;
             }
         }
 
@@ -706,26 +842,32 @@
             return `${year}-${month}-${day}`;
         }
 
-        // Dynamic status badge colorizer
-        function setSyncStatus(status) {
-            const badge = document.getElementById('sync-status-badge');
-            const text = document.getElementById('sync-status-text');
-            if (status === 'synced') {
-                badge.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-500/30 text-xs text-emerald-400 bg-emerald-950/20";
-                text.textContent = "Đã đồng bộ";
-            } else if (status === 'saving') {
-                badge.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-blue-500/30 text-xs text-blue-400 bg-blue-950/20 animate-pulse";
-                text.textContent = "Đang lưu...";
-            } else if (status === 'connecting') {
-                badge.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-amber-500/30 text-xs text-amber-400 bg-amber-950/20 animate-pulse";
-                text.textContent = "Đang kết nối...";
-            } else if (status === 'error') {
-                badge.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-rose-500/30 text-xs text-rose-400 bg-rose-950/20";
-                text.textContent = "Lỗi đồng bộ";
-            } else {
-                badge.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-800 text-xs text-slate-400 bg-luxury-card/50";
-                text.textContent = "Ngoại tuyến";
+        // Custom config saved directly to Storage
+        function saveCustomFirebaseConfig() {
+            const rawConfig = document.getElementById('custom-firebase-config-input').value.trim();
+            if (!rawConfig) {
+                showNotification("Cảnh báo", "Hãy dán đoạn mã cấu hình Firebase hợp lệ.", "fa-triangle-exclamation");
+                return;
             }
+            try {
+                // Verify syntax JSON correctness
+                JSON.parse(rawConfig);
+                localStorage.setItem('sogr_custom_firebase_config_v1', rawConfig);
+                showNotification("Cập nhật thành công!", "Đang áp dụng máy chủ đám mây mới. Trang sẽ tự tải lại để kích hoạt kết nối.", "fa-circle-check");
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } catch (err) {
+                showNotification("Lỗi định dạng", "Cấu hình Firebase phải ở định dạng JSON hợp lệ.", "fa-triangle-exclamation");
+            }
+        }
+
+        function clearCustomFirebaseConfig() {
+            localStorage.removeItem('sogr_custom_firebase_config_v1');
+            showNotification("Đã reset cấu hình!", "Đã khôi phục cài đặt mặc định gốc. Trang đang tải lại...", "fa-circle-check");
+            setTimeout(() => {
+                window.location.reload();
+            }, 1200);
         }
 
         // 4. CARD FLIP INTERACTION
@@ -835,7 +977,7 @@
             document.getElementById('btn-theta').className = "py-3 px-4 rounded-xl border border-slate-700/60 hover:border-gold/50 bg-luxury-navy/40 hover:bg-gold/5 text-slate-300 hover:text-gold text-sm font-medium transition-all flex justify-between items-center";
         }
 
-        // 6. CINEMA MODE (AUTOSCROLL SCREEN)
+        // 6. CINEMA MODE (AUTOSCROLL SCREEN - FIXED WIDTH WRAPPING BUG)
         let scrollSpeedMultiplier = 1.0;
         let currentScrollY = 0;
         let isScrolling = false;
@@ -1030,16 +1172,30 @@
             }, 4500);
         }
 
+        // Modal triggers
+        function openCloudModal() {
+            document.getElementById('cloud-settings-modal').classList.remove('hidden');
+            updateSyncIdDisplay();
+        }
+
+        function closeCloudModal() {
+            document.getElementById('cloud-settings-modal').classList.add('hidden');
+        }
+
         // Clipboard Copy Utility safely respecting CSP permissions
-        function copyUserId() {
-            if (!currentUser) return;
+        function copyCurrentUserId() {
+            const activeId = getActiveSyncId();
+            if (activeId === "Chưa kết nối đám mây") {
+                showNotification("Chưa kết nối", "Bạn cần cấu hình Firebase trước để tạo mã ID.", "fa-triangle-exclamation");
+                return;
+            }
             const tempInput = document.createElement('input');
-            tempInput.value = currentUser.uid;
+            tempInput.value = activeId;
             document.body.appendChild(tempInput);
             tempInput.select();
             document.execCommand('copy');
             document.body.removeChild(tempInput);
-            showNotification("Đã Sao Chép ID!", "Hãy giữ lại mã định danh này để đồng bộ tiến độ trên các trình duyệt khác.");
+            showNotification("Đã Sao Chép ID!", "Hãy giữ lại mã định danh này để dán vào các thiết bị khác.");
         }
 
         // 8. PRINT MODE HANDLERS
@@ -1059,7 +1215,12 @@
         window.checkRitualCompletion = checkRitualCompletion;
         window.completeDay = completeDay;
         window.triggerPrint = triggerPrint;
-        window.copyUserId = copyUserId;
+        window.openCloudModal = openCloudModal;
+        window.closeCloudModal = closeCloudModal;
+        window.applyCustomSyncId = applyCustomSyncId;
+        window.copyCurrentUserId = copyCurrentUserId;
+        window.saveCustomFirebaseConfig = saveCustomFirebaseConfig;
+        window.clearCustomFirebaseConfig = clearCustomFirebaseConfig;
     </script>
 </body>
 </html>
